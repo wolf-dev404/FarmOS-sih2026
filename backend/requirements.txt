@@ -1,0 +1,21 @@
+# FarmOS Backend Dependencies
+# Web Framework & API
+Flask>=3.0.0
+flask-cors>=4.0.0
+python-dotenv>=1.0.0
+
+# Database & ORM
+psycopg2-binary>=2.9.9
+SQLAlchemy>=2.0.0
+
+# Data Processing & External APIs
+pandas>=2.2.0
+numpy>=1.26.0
+requests>=2.31.0
+
+# Authentication & Security
+PyJWT>=2.8.0
+bcrypt>=4.1.0
+
+# Testing
+pytest>=8.0.0

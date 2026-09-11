@@ -1,0 +1,12 @@
+-- ==========================================================
+-- FarmOS Database Schema Scaffolding
+-- Team: NEXUS | SIH 2026 (Problem Statement 26132)
+-- Database: PostgreSQL
+-- ==========================================================
+
+-- Tables to be defined in upcoming phases:
+-- 1. users (id, name, role [farmer/buyer], phone, email, hashed_password, location_lat, location_lng, address, created_at)
+-- 2. lots (id, farmer_id, crop_name, variety, quantity_quintals, grade, harvest_date, base_price, status, created_at)
+-- 3. buyer_requirements (id, buyer_id, crop_name, min_grade, quantity_needed, max_price, delivery_location, status, created_at)
+-- 4. offers (id, lot_id, buyer_id, offered_price, quantity, status [pending/accepted/rejected/completed], created_at)
+-- 5. market_prices (id, mandi_name, district, state, commodity, variety, arrival_date, min_price, max_price, modal_price)
