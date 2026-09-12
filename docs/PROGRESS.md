@@ -8,7 +8,7 @@ Project: **FarmOS** | Team: **NEXUS** | SIH 2026 (PS 26132)
 
 | Phase | Description | Status | Details / Deliverables |
 | :--- | :--- | :--- | :--- |
-| **Phase 1** | **Farmer & Buyer Profiles + Auth** | 🟡 **IN PROGRESS** | User registration, authentication, role management (Farmer/Buyer), profile setup with location. |
+| **Phase 1** | **Farmer & Buyer Profiles + Auth** | 🟡 **IN PROGRESS** (Tables created, auth pages pending) | Database tables (farmers, buyers) created in Supabase. Placeholder auth files and schema.sql established. Registration and login implementation pending. |
 | **Phase 2** | **Crop/Lot Listing & Management** | ⚪ **NOT STARTED** | Produce lot creation, crop specs, quantity, grading, pricing, and lot inventory dashboard. |
 | **Phase 3** | **Market Price Dashboard & Trends** | ⚪ **NOT STARTED** | Agmarknet API integration (data.gov.in), daily APMC mandi rates, interactive Chart.js price trends. |
 | **Phase 4** | **Farmer-Buyer Matching** | ⚪ **NOT STARTED** | Buyer requirement posts, rule-based matching engine (crop, quality grade, quantity filters). |
