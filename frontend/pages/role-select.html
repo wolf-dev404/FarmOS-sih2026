@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Select Your Role — FarmOS</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="role-select-page">
+  <header class="role-navbar">
+    <a href="../index.html" class="brand-logo-badge" style="color: var(--color-primary);">
+      <div class="leaf-icon">🌿</div>
+      <span>FarmOS</span>
+    </a>
+    <a href="../index.html" class="back-link">
+      ← Back to Home
+    </a>
+  </header>
+
+  <main class="role-container">
+    <h1 class="role-heading">Who are you?</h1>
+    <p class="role-subtext">Choose how you want to participate on the FarmOS agricultural exchange.</p>
+
+    <div class="role-cards-grid">
+      <!-- Farmer Card -->
+      <div class="role-card">
+        <div class="role-card-top">
+          <div class="role-card-icon">
+            <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582"></path>
+            </svg>
+          </div>
+          <span class="role-card-badge">SELLER</span>
+        </div>
+
+        <h2 class="role-card-title">I am a Farmer</h2>
+        <p class="role-card-desc">
+          List your crop lots, view live Agmarknet APMC mandi prices, get net realization forecasts, and sell directly to verified buyers.
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: auto;">
+          <a href="farmer-register.html" class="btn-primary" style="padding: 10px 16px; text-decoration: none; font-size: 0.95rem;">
+            Create Farmer Account →
+          </a>
+          <a href="farmer-login.html" class="role-card-link" style="justify-content: center; font-size: 0.875rem;">
+            Already have an account? Log In
+          </a>
+        </div>
+      </div>
+
+      <!-- Buyer Card -->
+      <div class="role-card buyer">
+        <div class="role-card-top">
+          <div class="role-card-icon">
+            <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+            </svg>
+          </div>
+          <span class="role-card-badge">BUYER</span>
+        </div>
+
+        <h2 class="role-card-title">I am a Buyer</h2>
+        <p class="role-card-desc">
+          Procure quality produce for your trading business, retail chain, FPO, or food processing unit with verified quality grades and direct farmer linkage.
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: auto;">
+          <a href="buyer-register.html" class="btn-primary" style="background-color: #B45309; padding: 10px 16px; text-decoration: none; font-size: 0.95rem;">
+            Create Buyer Account →
+          </a>
+          <a href="buyer-login.html" class="role-card-link" style="justify-content: center; font-size: 0.875rem; color: #B45309;">
+            Already registered? Log In
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

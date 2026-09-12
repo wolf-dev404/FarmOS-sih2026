@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Farmer Dashboard — FarmOS</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="dash-page">
+  <nav class="dash-navbar">
+    <div class="dash-nav-left">
+      <a href="../index.html" class="brand-logo-badge" style="color: #FFFFFF;">
+        <div class="leaf-icon">🌿</div>
+        <span>FarmOS</span>
+      </a>
+      <span style="background: rgba(255, 255, 255, 0.15); padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700;">
+        FARMER PORTAL
+      </span>
+    </div>
+    <div class="dash-user-menu">
+      <span id="userNavDisplay" style="font-size: 0.9rem; font-weight: 600;">Farmer</span>
+      <button id="logoutBtn" class="dash-btn-logout">Sign Out</button>
+    </div>
+  </nav>
+
+  <main class="dash-main">
+    <div class="dash-welcome-card">
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+        <div>
+          <span style="color: var(--color-secondary); font-weight: 700; font-size: 0.85rem; letter-spacing: 0.06em; text-transform: uppercase;">
+            Dashboard Overview
+          </span>
+          <h1 id="welcomeTitle">Welcome, Farmer!</h1>
+          <p id="welcomeSubtitle" style="color: var(--color-text-muted); font-size: 1rem;">
+            Your FarmOS farmer profile is active and connected to the live exchange network.
+          </p>
+        </div>
+        <div style="text-align: right;">
+          <span style="background: #EAF4EE; color: var(--color-primary); padding: 6px 14px; border-radius: 9999px; font-weight: 700; font-size: 0.85rem; border: 1px solid rgba(64, 145, 108, 0.25);">
+            ● Verified Farmer Account
+          </span>
+        </div>
+      </div>
+
+      <div class="dash-profile-meta" id="profileMeta">
+        <div class="dash-meta-badge">
+          Email: <strong id="profileEmail">—</strong>
+        </div>
+        <div class="dash-meta-badge">
+          Phone: <strong id="profilePhone">—</strong>
+        </div>
+        <div class="dash-meta-badge">
+          Location: <strong id="profileLocation">—</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 2+ placeholders -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+      <div style="background: #FFFFFF; border: 1px dashed var(--color-border); border-radius: 12px; padding: 24px;">
+        <div style="font-size: 1.5rem; margin-bottom: 8px;">📦</div>
+        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 6px;">Produce Lot Management</h3>
+        <p style="color: var(--color-text-muted); font-size: 0.875rem; margin-bottom: 16px;">
+          Create new harvest listings with grade, variety, moisture, and target price.
+        </p>
+        <span style="font-size: 0.8rem; font-weight: 700; color: #B45309; background: #FEF7EA; padding: 4px 8px; border-radius: 4px;">
+          Phase 2 Deliverable
+        </span>
+      </div>
+
+      <div style="background: #FFFFFF; border: 1px dashed var(--color-border); border-radius: 12px; padding: 24px;">
+        <div style="font-size: 1.5rem; margin-bottom: 8px;">📊</div>
+        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 6px;">Live APMC Mandi Rates</h3>
+        <p style="color: var(--color-text-muted); font-size: 0.875rem; margin-bottom: 16px;">
+          Direct feed from data.gov.in Agmarknet with modal prices across Maharashtra.
+        </p>
+        <span style="font-size: 0.8rem; font-weight: 700; color: #B45309; background: #FEF7EA; padding: 4px 8px; border-radius: 4px;">
+          Phase 3 Deliverable
+        </span>
+      </div>
+
+      <div style="background: #FFFFFF; border: 1px dashed var(--color-border); border-radius: 12px; padding: 24px;">
+        <div style="font-size: 1.5rem; margin-bottom: 8px;">🤝</div>
+        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 6px;">Buyer Matchmaking</h3>
+        <p style="color: var(--color-text-muted); font-size: 0.875rem; margin-bottom: 16px;">
+          Direct buyer trade offers and automated net price realization scoring.
+        </p>
+        <span style="font-size: 0.8rem; font-weight: 700; color: #B45309; background: #FEF7EA; padding: 4px 8px; border-radius: 4px;">
+          Phase 4 & 5 Deliverable
+        </span>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { getSupabase } from '../js/supabaseClient.js';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // 1. Try reading cached user details
+      const cached = localStorage.getItem('farmos_user');
+      let userData = cached ? JSON.parse(cached) : null;
+
+      // 2. Fetch fresh session from Supabase
+      try {
+        const client = getSupabase();
+        const { data: { session } } = await client.auth.getSession();
+        
+        if (session && session.user) {
+          const user = session.user;
+          // Fetch from farmers table if not in cache
+          const { data: profile } = await client
+            .from('farmers')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+
+          if (profile) {
+            userData = { ...profile, email: user.email };
+            localStorage.setItem('farmos_user', JSON.stringify(userData));
+          } else if (!userData) {
+            userData = {
+              name: user.user_metadata?.name || 'Farmer',
+              email: user.email,
+              phone: user.user_metadata?.phone || '—',
+              village: user.user_metadata?.village || '',
+              district: user.user_metadata?.district || '',
+              state: user.user_metadata?.state || ''
+            };
+          }
+        }
+      } catch (e) {
+        console.warn('Session verification fallback:', e);
+      }
+
+      if (userData) {
+        const displayName = userData.name || 'Farmer';
+        document.getElementById('welcomeTitle').textContent = `Welcome, ${displayName}!`;
+        document.getElementById('userNavDisplay').textContent = displayName;
+        document.getElementById('profileEmail').textContent = userData.email || '—';
+        document.getElementById('profilePhone').textContent = userData.phone || '—';
+        const loc = [userData.village, userData.district, userData.state].filter(Boolean).join(', ') || '—';
+        document.getElementById('profileLocation').textContent = loc;
+      }
+
+      // Logout handler
+      document.getElementById('logoutBtn').addEventListener('click', async () => {
+        try {
+          const client = getSupabase();
+          await client.auth.signOut();
+        } catch (err) {}
+        localStorage.removeItem('farmos_user');
+        window.location.href = 'farmer-login.html';
+      });
+    });
+  </script>
+</body>
+</html>
