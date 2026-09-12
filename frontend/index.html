@@ -7,12 +7,15 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="landing-page">
-  <!-- Navigation Bar -->
+  <!-- Nav bar: FarmOS logo + "Smart Agri Marketplace" subtitle (left), "How it works" / "About" / "Sign in" links + gold "Get Started" button (right). Off-white background -->
   <nav class="landing-nav">
-    <a href="index.html" class="brand-logo-badge" style="color: var(--color-primary);">
-      <div class="leaf-icon">🌿</div>
-      <span>FarmOS</span>
-    </a>
+    <div class="landing-brand-wrap">
+      <a href="index.html" class="brand-logo-badge" style="color: var(--color-primary);">
+        <div class="leaf-icon">🌿</div>
+        <span>FarmOS</span>
+      </a>
+      <span class="brand-nav-subtitle">Smart Agri Marketplace</span>
+    </div>
 
     <div class="landing-nav-links">
       <a href="#capabilities" class="landing-nav-link">How it works</a>
@@ -22,95 +25,198 @@
     </div>
   </nav>
 
-  <!-- Hero Section -->
-  <header class="hero-section">
-    <div class="hero-badge">
-      <span>🌾</span> Smart India Hackathon 2026 | PS 26132 (Govt. of Maharashtra)
-    </div>
-    <h1 class="hero-title">
-      Connect Every Harvest to Its<br>
-      <span>Best Market Opportunity</span>
-    </h1>
-    <p class="hero-subtitle">
-      Stop distress selling at farmgates. FarmOS equips farmers and buyers with real-time APMC mandi prices, logistics-aware net returns, and direct verified trade linkages.
-    </p>
+  <!-- HERO SECTION -->
+  <header class="hero-container">
+    <div class="hero-grid">
+      <!-- Left Column: Headline, Subtext, Buttons, Tags -->
+      <div>
+        <div class="hero-pill-badge">
+          <span>✨</span> SIH 2026 · Intelligent Agri Platform
+        </div>
 
-    <div class="hero-actions">
-      <a href="pages/farmer-register.html" class="btn-primary" style="width: auto; padding: 14px 28px; text-decoration: none;">
-        Register as Farmer →
-      </a>
-      <a href="pages/buyer-register.html" class="btn-gold" style="padding: 14px 28px; text-decoration: none; font-size: 1rem;">
-        Register as Buyer →
-      </a>
+        <h1 class="hero-title-revised">
+          Connecting every <span class="hero-word-harvest">harvest</span><br>
+          to its best<br>
+          <span class="hero-word-opportunity">opportunity</span>
+        </h1>
+
+        <p class="hero-subtext-2lines">
+          Stop distress selling at farmgates. FarmOS equips farmers and buyers with live APMC mandi prices, logistics-aware net returns, and verified direct trade linkages.
+        </p>
+
+        <div class="hero-buttons-row">
+          <a href="pages/role-select.html" class="btn-hero-solid">
+            Get Started →
+          </a>
+          <a href="#capabilities" class="btn-hero-outline">
+            Explore FarmOS
+          </a>
+        </div>
+
+        <!-- 4 small pill-style feature tags with tiny icons -->
+        <div class="hero-tags-row">
+          <div class="hero-feature-tag">
+            <span>📊</span> Price Discovery
+          </div>
+          <div class="hero-feature-tag">
+            <span>🛡️</span> Verified Users
+          </div>
+          <div class="hero-feature-tag">
+            <span>🤝</span> Direct Offers
+          </div>
+          <div class="hero-feature-tag">
+            <span>📈</span> Market Trends
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Real photograph with two floating stat cards -->
+      <div class="hero-image-container">
+        <!-- Top-right overlapping card -->
+        <div class="floating-stat-card top-right">
+          <span class="floating-stat-icon">📍</span>
+          <div class="floating-stat-text">
+            Markets Mapped — <span>500+</span>
+          </div>
+        </div>
+
+        <!-- Real photograph of Indian farmland / farmer inspects healthy crops -->
+        <img 
+          src="https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=1200&q=80" 
+          alt="Indian agricultural farmland and thriving crops" 
+          class="hero-photo"
+          loading="eager"
+        >
+
+        <!-- Bottom-left overlapping card -->
+        <div class="floating-stat-card bottom-left">
+          <span class="floating-stat-icon">📈</span>
+          <div class="floating-stat-text">
+            Avg. Price Uplift — <span>+18.5%</span>
+          </div>
+        </div>
+      </div>
     </div>
   </header>
 
-  <!-- Core Capabilities Section -->
+  <!-- FEATURE CARDS SECTION (Scroll-triggered entrance animation) -->
   <section class="capabilities-section" id="capabilities">
     <div class="capabilities-header">
       <span class="capabilities-eyebrow">CORE CAPABILITIES</span>
-      <h2 class="capabilities-headline">Engineered for Transparent Agricultural Trade</h2>
+      <h2 class="capabilities-headline">Everything you need to trade with confidence</h2>
+      <p class="capabilities-subtext">
+        Comprehensive market intelligence tools engineered to eliminate distress selling and ensure guaranteed fair trade returns.
+      </p>
     </div>
 
-    <div class="capabilities-grid">
-      <!-- Card 1 -->
-      <div class="feature-card">
-        <div class="feature-icon">
-          <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+    <div class="capabilities-grid" id="capabilitiesGrid">
+      <!-- Card 1: Smart Price Discovery -->
+      <div class="feature-card-animate">
+        <div class="feature-soft-circle">
+          <svg width="26" height="26" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
           </svg>
         </div>
-        <h3 class="feature-title">Live Mandi Prices</h3>
-        <p class="feature-desc">
-          Daily commodity price feeds from data.gov.in Agmarknet API tracking modal prices across all Maharashtra APMCs.
+        <h3 class="feature-title">Smart Price Discovery</h3>
+        <p class="feature-desc-2lines">
+          Real-time daily modal price feeds from data.gov.in Agmarknet API across all Maharashtra APMC mandis.
         </p>
       </div>
 
-      <!-- Card 2 -->
-      <div class="feature-card">
-        <div class="feature-icon">
-          <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+      <!-- Card 2: Verified Network -->
+      <div class="feature-card-animate">
+        <div class="feature-soft-circle">
+          <svg width="26" height="26" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
           </svg>
         </div>
-        <h3 class="feature-title">Direct Buyer Linkage</h3>
-        <p class="feature-desc">
-          Rule-based engine matching farmer harvest lots directly with bulk buyers, FPOs, and certified agro-processors.
+        <h3 class="feature-title">Verified Network</h3>
+        <p class="feature-desc-2lines">
+          Connect directly with authentic registered farmers, active FPO collectives, and licensed institutional buyers.
         </p>
       </div>
 
-      <!-- Card 3 -->
-      <div class="feature-card">
-        <div class="feature-icon">
-          <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+      <!-- Card 3: Demand Forecasting -->
+      <div class="feature-card-animate">
+        <div class="feature-soft-circle">
+          <svg width="26" height="26" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
           </svg>
         </div>
-        <h3 class="feature-title">Net Realisation Model</h3>
-        <p class="feature-desc">
-          Calculates real profitability factoring gross mandi rates, transport distances, and perishability storage costs.
+        <h3 class="feature-title">Demand Forecasting</h3>
+        <p class="feature-desc-2lines">
+          Predictive volume matching that pairs seasonal harvest lots with active commercial food processing orders.
         </p>
       </div>
 
-      <!-- Card 4 -->
-      <div class="feature-card">
-        <div class="feature-icon">
-          <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+      <!-- Card 4: Direct Offers -->
+      <div class="feature-card-animate">
+        <div class="feature-soft-circle">
+          <svg width="26" height="26" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
           </svg>
         </div>
-        <h3 class="feature-title">Transparent Contracts</h3>
-        <p class="feature-desc">
-          Binding digital purchase offers, clear grade specifications, and traceable settlement lifecycles.
+        <h3 class="feature-title">Direct Offers</h3>
+        <p class="feature-desc-2lines">
+          End-to-end digital offer negotiation lifecycle with transparent quality specs and dispute-free settlement.
         </p>
       </div>
     </div>
   </section>
 
-  <!-- About section anchor -->
-  <footer id="about" style="border-top: 1px solid var(--color-border); padding: 48px 24px; text-align: center; color: var(--color-text-muted); font-size: 0.9rem;">
+  <!-- BOTTOM CTA SECTION -->
+  <section class="bottom-cta-section">
+    <div class="cta-inner-container">
+      <span class="cta-gold-eyebrow">FARMOS TAGLINE</span>
+      <h2 class="cta-white-headline">Connecting Every Harvest to Its Best Opportunity</h2>
+      <p class="cta-supporting-text">
+        Join thousands of farmers, FPOs, and certified buyers already discovering transparent pricing and guaranteed settlements on FarmOS.
+      </p>
+
+      <div class="cta-buttons-row">
+        <a href="pages/role-select.html" class="btn-cta-gold">
+          Get Started — It's Free
+        </a>
+        <a href="pages/role-select.html" class="btn-cta-outline">
+          Choose Your Role
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer id="about" style="border-top: 1px solid var(--color-border); padding: 40px 24px; text-align: center; color: var(--color-text-muted); font-size: 0.875rem; background-color: var(--color-surface);">
     <p><strong>FarmOS</strong> — Market Linkage & Price Discovery Platform</p>
-    <p style="margin-top: 6px;">Developed by <strong>Team NEXUS</strong> for Smart India Hackathon 2026</p>
+    <p style="margin-top: 6px;">Developed by <strong>Team NEXUS</strong> for Smart India Hackathon 2026 (Problem Statement 26132)</p>
   </footer>
+
+  <!-- Scroll-triggered entrance animation using Intersection Observer (vanilla JS, no library) -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const cards = document.querySelectorAll('.feature-card-animate');
+      
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries, obs) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const card = entry.target;
+              const index = Array.from(cards).indexOf(card);
+              card.style.transitionDelay = `${index * 100}ms`;
+              card.classList.add('is-visible');
+              obs.unobserve(card);
+            }
+          });
+        }, {
+          threshold: 0.15,
+          rootMargin: '0px 0px -40px 0px'
+        });
+
+        cards.forEach(card => observer.observe(card));
+      } else {
+        // Fallback if browser doesn't support IntersectionObserver
+        cards.forEach(card => card.classList.add('is-visible'));
+      }
+    });
+  </script>
 </body>
 </html>
