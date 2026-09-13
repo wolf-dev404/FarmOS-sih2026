@@ -59,6 +59,7 @@ CREATE POLICY "Buyers insert policy" ON public.buyers
     FOR INSERT TO authenticated
     WITH CHECK ((select auth.uid()) = id);
 
+-- Buyers update policy
 DROP POLICY IF EXISTS "Buyers update policy" ON public.buyers;
 CREATE POLICY "Buyers update policy" ON public.buyers
     FOR UPDATE TO authenticated
@@ -117,3 +118,86 @@ DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
     AFTER INSERT ON auth.users
     FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- ==========================================================
+-- Phase 2a: Crops Reference & Produce Lots
+-- ==========================================================
+
+-- Crops reference table
+CREATE TABLE IF NOT EXISTS public.crops (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL UNIQUE,
+    category TEXT NOT NULL,
+    unit TEXT NOT NULL DEFAULT 'quintal',
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Produce lots table
+CREATE TABLE IF NOT EXISTS public.lots (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    farmer_id UUID NOT NULL REFERENCES public.farmers(id) ON DELETE CASCADE,
+    crop_id UUID NOT NULL REFERENCES public.crops(id) ON DELETE CASCADE,
+    quantity NUMERIC NOT NULL CHECK (quantity > 0),
+    unit TEXT NOT NULL DEFAULT 'quintal',
+    grade TEXT,
+    price_expectation NUMERIC CHECK (price_expectation IS NULL OR price_expectation >= 0),
+    available_from DATE DEFAULT CURRENT_DATE,
+    status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'sold', 'expired')),
+    location TEXT,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Enable RLS
+ALTER TABLE public.crops ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lots ENABLE ROW LEVEL SECURITY;
+
+-- Crops policies (publicly readable by everyone)
+DROP POLICY IF EXISTS "Crops select policy" ON public.crops;
+CREATE POLICY "Crops select policy" ON public.crops
+    FOR SELECT USING (true);
+
+-- Lots policies
+-- Anyone can view active lots, and farmers can view all their own lots
+DROP POLICY IF EXISTS "Lots read policy" ON public.lots;
+CREATE POLICY "Lots read policy" ON public.lots
+    FOR SELECT USING (status = 'active' OR (select auth.uid()) = farmer_id);
+
+-- Farmers can insert lots with their own farmer_id
+DROP POLICY IF EXISTS "Farmers insert lots policy" ON public.lots;
+CREATE POLICY "Farmers insert lots policy" ON public.lots
+    FOR INSERT TO authenticated
+    WITH CHECK ((select auth.uid()) = farmer_id);
+
+-- Farmers can update their own lots
+DROP POLICY IF EXISTS "Farmers update lots policy" ON public.lots;
+CREATE POLICY "Farmers update lots policy" ON public.lots
+    FOR UPDATE TO authenticated
+    USING ((select auth.uid()) = farmer_id)
+    WITH CHECK ((select auth.uid()) = farmer_id);
+
+-- Farmers can delete their own lots
+DROP POLICY IF EXISTS "Farmers delete lots policy" ON public.lots;
+CREATE POLICY "Farmers delete lots policy" ON public.lots
+    FOR DELETE TO authenticated
+    USING ((select auth.uid()) = farmer_id);
+
+-- Seed crops
+INSERT INTO public.crops (name, category, unit) VALUES
+    ('Tomato', 'Vegetable', 'quintal'),
+    ('Onion', 'Vegetable', 'quintal'),
+    ('Potato', 'Vegetable', 'quintal'),
+    ('Wheat', 'Grain', 'quintal'),
+    ('Rice', 'Grain', 'quintal'),
+    ('Cotton', 'Cash Crop', 'quintal'),
+    ('Sugarcane', 'Cash Crop', 'ton'),
+    ('Maize', 'Grain', 'quintal'),
+    ('Soybean', 'Oilseed', 'quintal'),
+    ('Groundnut', 'Oilseed', 'quintal'),
+    ('Turmeric', 'Spice', 'quintal'),
+    ('Chili', 'Spice', 'quintal'),
+    ('Banana', 'Fruit', 'quintal'),
+    ('Mango', 'Fruit', 'crate'),
+    ('Cauliflower', 'Vegetable', 'quintal')
+ON CONFLICT (name) DO UPDATE SET
+    category = EXCLUDED.category,
+    unit = EXCLUDED.unit;
