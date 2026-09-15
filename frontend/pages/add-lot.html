@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="../css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="dash-page">
+<body class="dash-page" style="visibility: hidden;">
   <nav class="dash-navbar">
     <div class="dash-nav-left">
       <a href="../index.html" class="brand-logo-badge" style="color: #FFFFFF;">
@@ -126,48 +126,25 @@
   </main>
 
   <script type="module">
-    import { getSupabase } from '../js/supabaseClient.js';
+    import { requireAuth } from '../js/authGuard.js';
 
     let supabase;
     let currentUser = null;
+    let farmerProfile = null;
     let cachedCrops = [];
 
     document.addEventListener('DOMContentLoaded', async () => {
-      try {
-        supabase = getSupabase();
-      } catch (err) {
-        console.error('Supabase init error:', err);
-        return;
-      }
+      // 1. Strict Server & DB Role Gate: Must exist in farmers table
+      const auth = await requireAuth(['farmer']);
+      currentUser = auth.user;
+      farmerProfile = auth.profile;
+      supabase = auth.supabase;
 
-      // Verify authenticated session
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session || !session.user) {
-        const cached = localStorage.getItem('farmos_user');
-        if (!cached) {
-          window.location.href = 'farmer-login.html';
-          return;
-        }
-        currentUser = JSON.parse(cached);
-      } else {
-        currentUser = session.user;
-      }
-
-      // Pre-fill default date & location from profile
+      // Pre-fill default date & location from verified profile
       document.getElementById('availDateInput').value = new Date().toISOString().split('T')[0];
-
-      try {
-        const { data: profile } = await supabase
-          .from('farmers')
-          .select('*')
-          .eq('id', currentUser.id)
-          .single();
-        if (profile) {
-          document.getElementById('userNavDisplay').textContent = profile.name || 'Farmer';
-          const loc = [profile.village, profile.district, profile.state].filter(Boolean).join(', ');
-          if (loc) document.getElementById('locationInput').value = loc;
-        }
-      } catch (e) {}
+      document.getElementById('userNavDisplay').textContent = farmerProfile.name || 'Farmer';
+      const loc = [farmerProfile.village, farmerProfile.district, farmerProfile.state].filter(Boolean).join(', ');
+      if (loc) document.getElementById('locationInput').value = loc;
 
       // Load crops
       await loadCrops();

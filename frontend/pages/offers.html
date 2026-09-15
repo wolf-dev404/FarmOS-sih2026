@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="../css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="dash-page">
+<body class="dash-page" style="visibility: hidden;">
   <!-- Dynamic Navbar -->
   <nav class="dash-navbar" id="offersNavbar">
     <div class="dash-nav-left">
@@ -51,14 +51,12 @@
         </p>
       </div>
 
-      <!-- Role Perspective Selector -->
-      <div style="background: #FFFFFF; border: 1px solid var(--color-border); border-radius: 12px; padding: 6px; display: flex; gap: 6px;">
-        <button id="viewFarmerOffersBtn" class="btn-primary-sm" style="font-size: 0.85rem; padding: 8px 14px;">
-          👨‍🌾 Received (Farmer)
-        </button>
-        <button id="viewBuyerOffersBtn" class="btn-secondary-sm" style="font-size: 0.85rem; padding: 8px 14px;">
-          🏢 Sent (Buyer)
-        </button>
+      <!-- Authenticated Perspective Badge (strictly read-only, driven by server authentication) -->
+      <div style="background: #FFFFFF; border: 1px solid var(--color-border); border-radius: 12px; padding: 10px 18px; display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 0.85rem; color: var(--color-text-muted);">Authenticated Role:</span>
+        <span id="authPerspectiveDisplay" style="font-size: 0.9rem; font-weight: 700; color: var(--color-text-dark);">
+          Checking session...
+        </span>
       </div>
     </div>
 
@@ -165,11 +163,11 @@
   </div>
 
   <script type="module">
-    import { getSupabase } from '../js/supabaseClient.js';
+    import { requireAuth } from '../js/authGuard.js';
 
     let supabase;
     let currentUser = null;
-    let currentRole = 'farmer'; // 'farmer' or 'buyer'
+    let currentRole = null;
     let allOffers = [];
     let activeCounterOfferId = null;
 
@@ -179,23 +177,11 @@
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
-      try {
-        supabase = getSupabase();
-      } catch (e) {
-        console.error('Supabase init failed:', e);
-      }
-
-      const cached = localStorage.getItem('farmos_user');
-      if (cached) {
-        try {
-          currentUser = JSON.parse(cached);
-          if (currentUser.buyer_type || currentUser.company_name) {
-            currentRole = 'buyer';
-          } else {
-            currentRole = 'farmer';
-          }
-        } catch (e) {}
-      }
+      // 1. Strictly enforce authenticated session and database-backed role
+      const auth = await requireAuth(['farmer', 'buyer']);
+      currentUser = auth.profile;
+      currentRole = auth.role;
+      supabase = auth.supabase;
 
       setupRoleUI();
       await loadOffers();
@@ -206,21 +192,24 @@
       const backBtn = document.getElementById('offersBackBtn');
       const navbar = document.getElementById('offersNavbar');
       const roleDisplay = document.getElementById('offersRoleDisplay');
+      const perspectiveDisplay = document.getElementById('authPerspectiveDisplay');
 
       if (currentRole === 'buyer') {
         backBtn.href = 'buyer-dashboard.html';
         backBtn.textContent = '← Buyer Portal';
         navbar.style.backgroundColor = '#163628';
-        roleDisplay.textContent = 'Buyer Deal Portal';
-        document.getElementById('viewBuyerOffersBtn').className = 'btn-primary-sm';
-        document.getElementById('viewFarmerOffersBtn').className = 'btn-secondary-sm';
+        roleDisplay.textContent = '🏢 Buyer Deal Portal';
+        if (perspectiveDisplay) {
+          perspectiveDisplay.textContent = '🏢 Commercial Buyer (Procurement View)';
+        }
       } else {
         backBtn.href = 'farmer-dashboard.html';
         backBtn.textContent = '← Farmer Portal';
         navbar.style.backgroundColor = '#1B4332';
-        roleDisplay.textContent = 'Farmer Deal Portal';
-        document.getElementById('viewFarmerOffersBtn').className = 'btn-primary-sm';
-        document.getElementById('viewBuyerOffersBtn').className = 'btn-secondary-sm';
+        roleDisplay.textContent = '👨‍🌾 Farmer Deal Portal';
+        if (perspectiveDisplay) {
+          perspectiveDisplay.textContent = '👨‍🌾 Agricultural Producer (Farmer View)';
+        }
       }
     }
 
@@ -505,19 +494,6 @@
     }
 
     function setupEventListeners() {
-      // Perspective toggle
-      document.getElementById('viewFarmerOffersBtn').addEventListener('click', () => {
-        currentRole = 'farmer';
-        setupRoleUI();
-        loadOffers();
-      });
-
-      document.getElementById('viewBuyerOffersBtn').addEventListener('click', () => {
-        currentRole = 'buyer';
-        setupRoleUI();
-        loadOffers();
-      });
-
       // Filter & Refresh
       document.getElementById('filterOfferStatus').addEventListener('change', renderOffers);
       document.getElementById('refreshOffersBtn').addEventListener('click', loadOffers);

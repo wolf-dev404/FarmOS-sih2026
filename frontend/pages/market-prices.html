@@ -181,6 +181,7 @@
   </main>
 
   <script type="module">
+    import { optionalAuth } from '../js/authGuard.js';
     import { getSupabase } from '../js/supabaseClient.js';
 
     let supabase;
@@ -199,36 +200,26 @@
         console.error('Supabase initialization error:', err);
       }
 
-      setupPortalNavigation();
+      await setupPortalNavigation();
       await fetchMarketPrices();
       setupEventListeners();
     });
 
-    function setupPortalNavigation() {
-      const cached = localStorage.getItem('farmos_user');
+    async function setupPortalNavigation() {
+      const auth = await optionalAuth();
       const backBtn = document.getElementById('backPortalBtn');
-      const authBtn = document.getElementById('authActionBtn');
       const navEl = document.getElementById('marketNav');
 
-      if (cached) {
-        try {
-          const user = JSON.parse(cached);
-          const isBuyer = user.company_name || user.buyer_type;
-          if (isBuyer) {
-            backBtn.href = 'buyer-dashboard.html';
-            backBtn.textContent = '← Buyer Portal';
-            navEl.style.backgroundColor = '#163628';
-          } else {
-            backBtn.href = 'farmer-dashboard.html';
-            backBtn.textContent = '← Farmer Portal';
-          }
-          authBtn.style.display = 'inline-block';
-          authBtn.addEventListener('click', async () => {
-            try { await supabase?.auth.signOut(); } catch (e) {}
-            localStorage.removeItem('farmos_user');
-            window.location.href = isBuyer ? 'buyer-login.html' : 'farmer-login.html';
-          });
-        } catch (e) {}
+      if (auth && auth.user) {
+        if (auth.role === 'buyer') {
+          backBtn.href = 'buyer-dashboard.html';
+          backBtn.textContent = '← Buyer Portal';
+          navEl.style.backgroundColor = '#163628';
+        } else {
+          backBtn.href = 'farmer-dashboard.html';
+          backBtn.textContent = '← Farmer Dashboard';
+          navEl.style.backgroundColor = '#1B4332';
+        }
       } else {
         backBtn.href = '../index.html';
         backBtn.textContent = '← FarmOS Home';

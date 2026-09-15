@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="../css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="dash-page">
+<body class="dash-page" style="visibility: hidden;">
   <!-- Dynamic Navbar -->
   <nav class="dash-navbar" id="matchesNavbar">
     <div class="dash-nav-left">
@@ -51,14 +51,12 @@
         </p>
       </div>
 
-      <!-- Mode Selector -->
-      <div style="background: #FFFFFF; border: 1px solid var(--color-border); border-radius: 12px; padding: 6px; display: flex; gap: 6px;">
-        <button id="modeFarmerBtn" class="btn-primary-sm" style="font-size: 0.85rem; padding: 8px 14px;">
-          👨‍🌾 Farmer View
-        </button>
-        <button id="modeBuyerBtn" class="btn-secondary-sm" style="font-size: 0.85rem; padding: 8px 14px;">
-          🏢 Buyer View
-        </button>
+      <!-- Authenticated Perspective Badge (strictly read-only, driven by server authentication) -->
+      <div style="background: #FFFFFF; border: 1px solid var(--color-border); border-radius: 12px; padding: 10px 18px; display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 0.85rem; color: var(--color-text-muted);">Authenticated Role:</span>
+        <span id="authPerspectiveDisplay" style="font-size: 0.9rem; font-weight: 700; color: var(--color-text-dark);">
+          Checking session...
+        </span>
       </div>
     </div>
 
@@ -194,12 +192,12 @@
   </div>
 
   <script type="module">
-    import { getSupabase } from '../js/supabaseClient.js';
+    import { requireAuth } from '../js/authGuard.js';
     import { calculateMatchScore, findMatchesForLot, findMatchesForRequirement, findAllMatches } from '../js/matching.js';
 
     let supabase;
     let currentUser = null;
-    let currentRole = 'buyer'; // default or detected from profile
+    let currentRole = null;
     let activeLots = [];
     let activeRequirements = [];
     let activeLotForOffer = null;
@@ -210,24 +208,11 @@
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
-      try {
-        supabase = getSupabase();
-      } catch (e) {
-        console.error('Failed to init Supabase:', e);
-      }
-
-      // Check session
-      const cached = localStorage.getItem('farmos_user');
-      if (cached) {
-        try {
-          currentUser = JSON.parse(cached);
-          if (currentUser.buyer_type || currentUser.company_name) {
-            currentRole = 'buyer';
-          } else {
-            currentRole = 'farmer';
-          }
-        } catch (e) {}
-      }
+      // 1. Strictly enforce authenticated session and database-backed role
+      const auth = await requireAuth(['farmer', 'buyer']);
+      currentUser = auth.profile;
+      currentRole = auth.role;
+      supabase = auth.supabase;
 
       setupRoleNavigation();
       await loadMatchingData();
@@ -238,21 +223,24 @@
       const backLink = document.getElementById('portalBackLink');
       const roleBadge = document.getElementById('userRoleBadge');
       const navbar = document.getElementById('matchesNavbar');
+      const perspectiveDisplay = document.getElementById('authPerspectiveDisplay');
 
       if (currentRole === 'buyer') {
         backLink.href = 'buyer-dashboard.html';
         backLink.textContent = '← Buyer Portal';
-        roleBadge.textContent = 'Procurement Matching';
+        roleBadge.textContent = '🏢 Verified Buyer';
         navbar.style.backgroundColor = '#163628';
-        document.getElementById('modeBuyerBtn').className = 'btn-primary-sm';
-        document.getElementById('modeFarmerBtn').className = 'btn-secondary-sm';
+        if (perspectiveDisplay) {
+          perspectiveDisplay.textContent = '🏢 Commercial Buyer (Procurement View)';
+        }
       } else {
         backLink.href = 'farmer-dashboard.html';
         backLink.textContent = '← Farmer Portal';
-        roleBadge.textContent = 'Producer Matching';
+        roleBadge.textContent = '👨‍🌾 Verified Farmer';
         navbar.style.backgroundColor = '#1B4332';
-        document.getElementById('modeFarmerBtn').className = 'btn-primary-sm';
-        document.getElementById('modeBuyerBtn').className = 'btn-secondary-sm';
+        if (perspectiveDisplay) {
+          perspectiveDisplay.textContent = '👨‍🌾 Agricultural Producer (Farmer View)';
+        }
       }
     }
 
@@ -492,21 +480,6 @@
     }
 
     function setupEventListeners() {
-      // Perspective switchers
-      document.getElementById('modeFarmerBtn').addEventListener('click', () => {
-        currentRole = 'farmer';
-        setupRoleNavigation();
-        populateEntityFilterDropdown();
-        computeAndRenderMatches();
-      });
-
-      document.getElementById('modeBuyerBtn').addEventListener('click', () => {
-        currentRole = 'buyer';
-        setupRoleNavigation();
-        populateEntityFilterDropdown();
-        computeAndRenderMatches();
-      });
-
       // Filters
       document.getElementById('activeEntitySelect').addEventListener('change', computeAndRenderMatches);
       document.getElementById('minScoreFilter').addEventListener('change', computeAndRenderMatches);

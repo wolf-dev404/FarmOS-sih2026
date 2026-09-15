@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="../css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="dash-page">
+<body class="dash-page" style="visibility: hidden;">
   <nav class="dash-navbar" style="background-color: #163628;">
     <div class="dash-nav-left">
       <a href="../index.html" class="brand-logo-badge" style="color: #FFFFFF;">
@@ -309,7 +309,7 @@
   </div>
 
   <script type="module">
-    import { getSupabase } from '../js/supabaseClient.js';
+    import { requireAuth } from '../js/authGuard.js';
 
     let supabase;
     let currentUser = null;
@@ -317,42 +317,18 @@
     let cropsList = [];
 
     document.addEventListener('DOMContentLoaded', async () => {
-      try {
-        supabase = getSupabase();
-      } catch (e) {
-        console.error('Supabase init failed:', e);
-        return;
-      }
+      // 1. Strict Server & DB Role Gate: Must exist in buyers table
+      const auth = await requireAuth(['buyer']);
+      currentUser = auth.user;
+      const profile = auth.profile;
+      supabase = auth.supabase;
 
-      // Check session
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session || !session.user) {
-        const cached = localStorage.getItem('farmos_user');
-        if (!cached) {
-          window.location.href = 'buyer-login.html';
-          return;
-        }
-        currentUser = JSON.parse(cached);
-      } else {
-        currentUser = session.user;
-      }
-
-      // Load Profile
-      try {
-        const { data: profile } = await supabase
-          .from('buyers')
-          .select('*')
-          .eq('id', currentUser.id)
-          .single();
-        if (profile) {
-          document.getElementById('welcomeTitle').textContent = `Welcome, ${profile.company_name || profile.name || 'Buyer'}!`;
-          document.getElementById('userNavDisplay').textContent = profile.name || profile.company_name || 'Buyer';
-          document.getElementById('profileCompany').textContent = profile.company_name || '—';
-          document.getElementById('profileType').textContent = (profile.buyer_type || 'Individual').toUpperCase();
-          document.getElementById('profileEmail').textContent = profile.email || currentUser.email || '—';
-          document.getElementById('profilePhone').textContent = profile.phone || '—';
-        }
-      } catch (e) {}
+      document.getElementById('welcomeTitle').textContent = `Welcome, ${profile.company_name || profile.name || 'Buyer'}!`;
+      document.getElementById('userNavDisplay').textContent = profile.name || profile.company_name || 'Buyer';
+      document.getElementById('profileCompany').textContent = profile.company_name || '—';
+      document.getElementById('profileType').textContent = (profile.buyer_type || 'Individual').toUpperCase();
+      document.getElementById('profileEmail').textContent = profile.email || currentUser.email || '—';
+      document.getElementById('profilePhone').textContent = profile.phone || '—';
 
       // Default needed-by date (+14 days)
       const defaultDate = new Date();

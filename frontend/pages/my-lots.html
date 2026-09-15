@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="../css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="dash-page">
+<body class="dash-page" style="visibility: hidden;">
   <!-- Top Navigation -->
   <nav class="dash-navbar">
     <div class="dash-nav-left">
@@ -15,7 +15,7 @@
         <div class="leaf-icon">🌿</div>
         <span>FarmOS</span>
       </a>
-      <a href="farmer-dashboard.html" style="background: rgba(255, 255, 255, 0.15); padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: #FFFFFF; text-decoration: none;">
+      <a id="dashBackBtn" href="farmer-dashboard.html" style="background: rgba(255, 255, 255, 0.15); padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: #FFFFFF; text-decoration: none;">
         ← Dashboard
       </a>
       <a href="market-prices.html" style="background: rgba(244, 185, 66, 0.2); border: 1px solid rgba(244, 185, 66, 0.4); padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: var(--color-accent); text-decoration: none;">
@@ -217,7 +217,7 @@
   </div>
 
   <script type="module">
-    import { getSupabase } from '../js/supabaseClient.js';
+    import { requireAuth } from '../js/authGuard.js';
 
     let supabase;
     let currentUser = null;
@@ -233,45 +233,16 @@
 
     // Initialize
     document.addEventListener('DOMContentLoaded', async () => {
-      try {
-        supabase = getSupabase();
-      } catch (err) {
-        console.error('Failed to init Supabase:', err);
-        alert('Supabase client error. Please check your network connection.');
-        return;
-      }
+      // 1. Strict Server & DB Role Gate: Must exist in farmers table
+      const auth = await requireAuth(['farmer']);
+      currentUser = auth.user;
+      farmerProfile = auth.profile;
+      supabase = auth.supabase;
 
-      // Check session
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session || !session.user) {
-        // Fallback check cached user or redirect
-        const cached = localStorage.getItem('farmos_user');
-        if (!cached) {
-          window.location.href = 'farmer-login.html';
-          return;
-        }
-        currentUser = JSON.parse(cached);
-      } else {
-        currentUser = session.user;
-      }
-
-      // Load farmer profile
-      try {
-        const { data: profile } = await supabase
-          .from('farmers')
-          .select('*')
-          .eq('id', currentUser.id)
-          .single();
-        if (profile) {
-          farmerProfile = profile;
-          const displayName = profile.name || currentUser.user_metadata?.name || 'Farmer';
-          document.getElementById('userNavDisplay').textContent = displayName;
-          if (profile.village || profile.district) {
-            document.getElementById('lotLocation').value = [profile.village, profile.district, profile.state].filter(Boolean).join(', ');
-          }
-        }
-      } catch (e) {
-        console.warn('Profile fetch note:', e);
+      const displayName = farmerProfile.name || 'Farmer';
+      document.getElementById('userNavDisplay').textContent = displayName;
+      if (farmerProfile.village || farmerProfile.district) {
+        document.getElementById('lotLocation').value = [farmerProfile.village, farmerProfile.district, farmerProfile.state].filter(Boolean).join(', ');
       }
 
       // Set default available date to today

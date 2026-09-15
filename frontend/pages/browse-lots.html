@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="../css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="dash-page">
+<body class="dash-page" style="visibility: hidden;">
   <!-- Buyer Top Navbar -->
   <nav class="dash-navbar" style="background-color: #163628;">
     <div class="dash-nav-left">
@@ -15,7 +15,7 @@
         <div class="leaf-icon" style="background: var(--color-accent);">🌿</div>
         <span>FarmOS</span>
       </a>
-      <a href="buyer-dashboard.html" style="background: rgba(255, 255, 255, 0.15); padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: #FFFFFF; text-decoration: none;">
+      <a id="dashBackBtn" href="buyer-dashboard.html" style="background: rgba(255, 255, 255, 0.15); padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: #FFFFFF; text-decoration: none;">
         ← Buyer Portal
       </a>
       <a href="market-prices.html" style="background: rgba(244, 185, 66, 0.2); border: 1px solid rgba(244, 185, 66, 0.4); padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: var(--color-accent); text-decoration: none;">
@@ -170,9 +170,11 @@
   </div>
 
   <script type="module">
-    import { getSupabase } from '../js/supabaseClient.js';
+    import { requireAuth } from '../js/authGuard.js';
 
     let supabase;
+    let currentUser = null;
+    let buyerProfile = null;
     let allActiveLots = [];
     let cropsMap = {};
 
@@ -182,22 +184,14 @@
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
-      try {
-        supabase = getSupabase();
-      } catch (e) {
-        console.error('Supabase init failed:', e);
-        return;
-      }
+      // 1. Strict Server & DB Role Gate: Must exist in buyers table
+      const auth = await requireAuth(['buyer']);
+      currentUser = auth.user;
+      buyerProfile = auth.profile;
+      supabase = auth.supabase;
 
-      // Check buyer session
-      const cached = localStorage.getItem('farmos_user');
-      if (cached) {
-        try {
-          const user = JSON.parse(cached);
-          const name = user.name || user.company_name || 'Buyer';
-          document.getElementById('userNavDisplay').textContent = name;
-        } catch (e) {}
-      }
+      const name = buyerProfile.name || buyerProfile.company_name || 'Buyer';
+      document.getElementById('userNavDisplay').textContent = name;
 
       // Load crops filter
       await loadCropsFilter();

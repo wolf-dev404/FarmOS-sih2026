@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="../css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="dash-page">
+<body class="dash-page" style="visibility: hidden;">
   <nav class="dash-navbar">
     <div class="dash-nav-left">
       <a href="../index.html" class="brand-logo-badge" style="color: #FFFFFF;">
@@ -181,81 +181,47 @@
 
 
   <script type="module">
-    import { getSupabase } from '../js/supabaseClient.js';
+    import { requireAuth } from '../js/authGuard.js';
 
     document.addEventListener('DOMContentLoaded', async () => {
-      // 1. Try reading cached user details
-      const cached = localStorage.getItem('farmos_user');
-      let userData = cached ? JSON.parse(cached) : null;
+      // 1. Strict Server & DB Role Gate: Must exist in farmers table
+      const { user, profile, role, supabase } = await requireAuth(['farmer']);
 
-      // 2. Fetch fresh session from Supabase
+      const displayName = profile.name || 'Farmer';
+      document.getElementById('welcomeTitle').textContent = `Welcome, ${displayName}!`;
+      document.getElementById('userNavDisplay').textContent = displayName;
+      document.getElementById('profileEmail').textContent = profile.email || user.email || '—';
+      document.getElementById('profilePhone').textContent = profile.phone || '—';
+      const loc = [profile.village, profile.district, profile.state].filter(Boolean).join(', ') || '—';
+      document.getElementById('profileLocation').textContent = loc;
+
+      // 2. Fetch active lots count for this farmer
       try {
-        const client = getSupabase();
-        const { data: { session } } = await client.auth.getSession();
-        
-        if (session && session.user) {
-          const user = session.user;
-          // Fetch from farmers table if not in cache
-          const { data: profile } = await client
-            .from('farmers')
-            .select('*')
-            .eq('id', user.id)
-            .single();
-
-          if (profile) {
-            userData = { ...profile, email: user.email };
-            localStorage.setItem('farmos_user', JSON.stringify(userData));
-          } else if (!userData) {
-            userData = {
-              name: user.user_metadata?.name || 'Farmer',
-              email: user.email,
-              phone: user.user_metadata?.phone || '—',
-              village: user.user_metadata?.village || '',
-              district: user.user_metadata?.district || '',
-              state: user.user_metadata?.state || ''
-            };
-          }
-        }
-      } catch (e) {
-        console.warn('Session verification fallback:', e);
-      }
-
-      if (userData) {
-        const displayName = userData.name || 'Farmer';
-        document.getElementById('welcomeTitle').textContent = `Welcome, ${displayName}!`;
-        document.getElementById('userNavDisplay').textContent = displayName;
-        document.getElementById('profileEmail').textContent = userData.email || '—';
-        document.getElementById('profilePhone').textContent = userData.phone || '—';
-        const loc = [userData.village, userData.district, userData.state].filter(Boolean).join(', ') || '—';
-        document.getElementById('profileLocation').textContent = loc;
-
-        // Fetch active lots count for farmer
-        try {
-          const client = getSupabase();
-          const { count, error } = await client
-            .from('lots')
-            .select('*', { count: 'exact', head: true })
-            .eq('farmer_id', userData.id)
-            .eq('status', 'active');
-          if (!error && count !== null) {
-            document.getElementById('dashActiveLotsCount').textContent = `${count} Active`;
-          } else {
-            document.getElementById('dashActiveLotsCount').textContent = '0 Active';
-          }
-        } catch (err) {
+        const { count, error } = await supabase
+          .from('lots')
+          .select('*', { count: 'exact', head: true })
+          .eq('farmer_id', user.id)
+          .eq('status', 'active');
+        if (!error && count !== null) {
+          document.getElementById('dashActiveLotsCount').textContent = `${count} Active`;
+        } else {
           document.getElementById('dashActiveLotsCount').textContent = '0 Active';
         }
+      } catch (err) {
+        document.getElementById('dashActiveLotsCount').textContent = '0 Active';
       }
 
-      // Logout handler
-      document.getElementById('logoutBtn').addEventListener('click', async () => {
-        try {
-          const client = getSupabase();
-          await client.auth.signOut();
-        } catch (err) {}
-        localStorage.removeItem('farmos_user');
-        window.location.href = 'farmer-login.html';
-      });
+      // 3. Fetch pending offers count for this farmer
+      try {
+        const { count: pendingCount, error: offerErr } = await supabase
+          .from('offers')
+          .select('*', { count: 'exact', head: true })
+          .eq('farmer_id', user.id)
+          .eq('status', 'pending');
+        if (!offerErr && pendingCount !== null) {
+          document.getElementById('dashPendingOffersCount').textContent = `${pendingCount} Pending`;
+        }
+      } catch (e) {}
     });
   </script>
 </body>

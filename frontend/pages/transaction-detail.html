@@ -7,15 +7,18 @@
   <link rel="stylesheet" href="../css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="dash-page">
+<body class="dash-page" style="visibility: hidden;">
   <nav class="dash-navbar" id="txNavbar">
     <div class="dash-nav-left">
       <a href="../index.html" class="brand-logo-badge" style="color: #FFFFFF;">
         <div class="leaf-icon">🌿</div>
         <span>FarmOS</span>
       </a>
+      <a id="portalBackLink" href="farmer-dashboard.html" style="background: rgba(255, 255, 255, 0.15); padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: #FFFFFF; text-decoration: none;">
+        ← Back to Portal
+      </a>
       <a href="offers.html" style="background: rgba(255, 255, 255, 0.15); padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: #FFFFFF; text-decoration: none;">
-        ← Back to Offers & Deals
+        💼 Offers & Deals
       </a>
     </div>
     <div class="dash-user-menu">
@@ -199,9 +202,10 @@
   </main>
 
   <script type="module">
-    import { getSupabase } from '../js/supabaseClient.js';
+    import { requireAuth } from '../js/authGuard.js';
 
     let supabase;
+    let currentUser = null;
     let transactionData = null;
 
     function formatINR(val) {
@@ -210,11 +214,10 @@
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
-      try {
-        supabase = getSupabase();
-      } catch (e) {
-        console.error('Supabase init failed:', e);
-      }
+      // 1. Enforce authentication
+      const auth = await requireAuth(['farmer', 'buyer']);
+      currentUser = auth.user;
+      supabase = auth.supabase;
 
       const params = new URLSearchParams(window.location.search);
       const txId = params.get('id');
@@ -248,6 +251,11 @@
         const { data, error } = await query.single();
         if (error) throw error;
         if (!data) throw new Error('Transaction record not found.');
+
+        // Enforce access control: only farmer or buyer involved in this deal can view
+        if (data.farmer_id !== currentUser.id && data.buyer_id !== currentUser.id) {
+          throw new Error('Unauthorized: You are not a party to this trade settlement.');
+        }
 
         transactionData = data;
         renderTransaction();

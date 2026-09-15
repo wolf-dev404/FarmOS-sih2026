@@ -19,11 +19,8 @@
       <span style="background: rgba(244, 185, 66, 0.2); color: var(--color-accent); padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; border: 1px solid rgba(244, 185, 66, 0.3);">
         PLATFORM ANALYTICS
       </span>
-      <a href="farmer-dashboard.html" style="background: rgba(255, 255, 255, 0.15); padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: #FFFFFF; text-decoration: none;">
-        👨‍🌾 Farmer Portal
-      </a>
-      <a href="buyer-dashboard.html" style="background: rgba(255, 255, 255, 0.15); padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: #FFFFFF; text-decoration: none;">
-        🏢 Buyer Portal
+      <a id="adminPortalReturnLink" href="role-select.html" style="background: rgba(255, 255, 255, 0.15); padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: #FFFFFF; text-decoration: none;">
+        ← Back to Portal
       </a>
       <a href="market-prices.html" style="background: rgba(255, 255, 255, 0.15); padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: #FFFFFF; text-decoration: none;">
         📊 APMC Rates
@@ -207,6 +204,7 @@
   </main>
 
   <script type="module">
+    import { optionalAuth } from '../js/authGuard.js';
     import { getSupabase } from '../js/supabaseClient.js';
 
     let supabase;
@@ -223,6 +221,22 @@
         supabase = getSupabase();
       } catch (e) {
         console.error('Supabase init failed:', e);
+      }
+
+      // Configure return link based on authenticated user
+      const auth = await optionalAuth();
+      const returnLink = document.getElementById('adminPortalReturnLink');
+      if (auth && auth.user) {
+        if (auth.role === 'buyer') {
+          returnLink.href = 'buyer-dashboard.html';
+          returnLink.textContent = '← Buyer Portal';
+        } else if (auth.role === 'farmer') {
+          returnLink.href = 'farmer-dashboard.html';
+          returnLink.textContent = '← Farmer Dashboard';
+        }
+      } else {
+        returnLink.href = 'role-select.html';
+        returnLink.textContent = '← Portal Sign In';
       }
 
       await loadAllAnalytics();
