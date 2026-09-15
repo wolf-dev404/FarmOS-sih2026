@@ -17,6 +17,15 @@
       <span style="background: rgba(244, 185, 66, 0.2); color: var(--color-accent); padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; border: 1px solid rgba(244, 185, 66, 0.3);">
         BUYER PORTAL
       </span>
+      <a href="matches.html" style="background: rgba(255, 255, 255, 0.15); padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: #FFFFFF; text-decoration: none;">
+        🎯 Matchmaking
+      </a>
+      <a href="offers.html" style="background: rgba(255, 255, 255, 0.15); padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: #FFFFFF; text-decoration: none;">
+        💼 My Offers
+      </a>
+      <a href="market-prices.html" style="background: rgba(244, 185, 66, 0.2); border: 1px solid rgba(244, 185, 66, 0.4); padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: var(--color-accent); text-decoration: none;">
+        📊 Mandi Rates
+      </a>
     </div>
     <div class="dash-user-menu">
       <span id="userNavDisplay" style="font-size: 0.9rem; font-weight: 600;">Procurement Partner</span>
@@ -24,7 +33,8 @@
     </div>
   </nav>
 
-  <main class="dash-main">
+  <main class="dash-main" style="max-width: 1100px;">
+    <!-- Welcome Header -->
     <div class="dash-welcome-card">
       <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
         <div>
@@ -33,7 +43,7 @@
           </span>
           <h1 id="welcomeTitle">Welcome, Buyer!</h1>
           <p id="welcomeSubtitle" style="color: var(--color-text-muted); font-size: 1rem;">
-            Your FarmOS buyer account is configured for commercial agricultural sourcing.
+            Your FarmOS buyer account is configured for commercial agricultural sourcing and direct producer matching.
           </p>
         </div>
         <div style="text-align: right;">
@@ -59,147 +69,493 @@
       </div>
     </div>
 
-    <!-- Active Modules Grid -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+    <!-- Active Feature Cards Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 36px;">
+      <!-- Post Requirement Card -->
+      <div class="dash-card-interactive">
+        <div>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <div style="font-size: 1.8rem;">📝</div>
+            <span class="badge-pill badge-live">● Live Feature</span>
+          </div>
+          <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--color-text-dark); margin-bottom: 6px;">
+            Post Requirement
+          </h3>
+          <p style="color: var(--color-text-muted); font-size: 0.875rem; margin-bottom: 16px;">
+            Post procurement volume, grade specs, price ceilings, and fulfillment deadlines.
+          </p>
+          <div style="background: var(--color-bg); padding: 8px 12px; border-radius: 8px; font-size: 0.82rem; margin-bottom: 16px;">
+            Your Active Posts: <strong id="dashBuyerReqsCount" style="color: var(--color-secondary);">0 Active</strong>
+          </div>
+        </div>
+        <div>
+          <button id="openPostReqBtn" class="btn-primary-sm" style="width: 100%; justify-content: center;">
+            + Post Requirement
+          </button>
+        </div>
+      </div>
+
       <!-- Explore Farm Produce Lots -->
       <div class="dash-card-interactive">
         <div>
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
             <div style="font-size: 1.8rem;">🌾</div>
-            <span class="badge-pill badge-live">● Live Marketplace</span>
+            <span class="badge-pill badge-live">● Marketplace</span>
           </div>
-          <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--color-text-dark); margin-bottom: 6px;">
-            Explore Farm Produce Lots
+          <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--color-text-dark); margin-bottom: 6px;">
+            Browse Produce Lots
           </h3>
           <p style="color: var(--color-text-muted); font-size: 0.875rem; margin-bottom: 16px;">
-            Browse farmer crop inventory with verified quality grades, expected rates, and origin districts across Maharashtra.
+            Browse verified farmer harvest inventory across Maharashtra with grade and rate discovery.
           </p>
-          <div style="background: var(--color-bg); padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: var(--color-text-muted); font-weight: 600;">Available Produce Lots:</span>
-            <strong id="dashTotalActiveLots" style="color: var(--color-secondary); font-size: 1.05rem;">—</strong>
+          <div style="background: var(--color-bg); padding: 8px 12px; border-radius: 8px; font-size: 0.82rem; margin-bottom: 16px;">
+            Total Active Lots: <strong id="dashTotalActiveLots" style="color: var(--color-secondary);">—</strong>
           </div>
         </div>
         <div>
-          <a href="browse-lots.html" class="btn-primary-sm" style="width: 100%; justify-content: center; text-decoration: none; box-sizing: border-box;">
-            Browse Active Lots →
+          <a href="browse-lots.html" class="btn-secondary-sm" style="width: 100%; justify-content: center; text-decoration: none; box-sizing: border-box;">
+            Explore Lots →
           </a>
         </div>
       </div>
 
-      <!-- Live APMC Mandi Rates -->
+      <!-- Buyer Matchmaking (Phase 3) -->
       <div class="dash-card-interactive">
         <div>
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-            <div style="font-size: 1.8rem;">📊</div>
-            <span class="badge-pill badge-live">● Live Feed</span>
+            <div style="font-size: 1.8rem;">🎯</div>
+            <span class="badge-pill badge-live">● AI Matching</span>
           </div>
-          <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--color-text-dark); margin-bottom: 6px;">
-            Live APMC Mandi Rates
+          <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--color-text-dark); margin-bottom: 6px;">
+            Smart Matchmaking
           </h3>
           <p style="color: var(--color-text-muted); font-size: 0.875rem; margin-bottom: 16px;">
-            Direct daily arrival prices from Agmarknet with 30-day temporal trend charts across Maharashtra mandis.
+            Rule-based algorithmic matching pairing your demand with farmer supply by price, quantity, and grade.
           </p>
-          <div style="background: var(--color-bg); padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: var(--color-text-muted); font-weight: 600;">Data Source:</span>
-            <span style="color: var(--color-primary); font-weight: 700;">Agmarknet API</span>
+          <div style="background: var(--color-bg); padding: 8px 12px; border-radius: 8px; font-size: 0.82rem; margin-bottom: 16px;">
+            Status: <span style="color: #15803D; font-weight: 700;">Engine Active</span>
           </div>
         </div>
         <div>
-          <a href="market-prices.html" class="btn-primary-sm" style="width: 100%; justify-content: center; text-decoration: none; box-sizing: border-box;">
-            View Live Mandi Rates →
+          <a href="matches.html" class="btn-accent-sm" style="width: 100%; justify-content: center; text-decoration: none; box-sizing: border-box;">
+            View Ranked Matches →
           </a>
         </div>
       </div>
 
-      <!-- Post Procurement Demand (Phase 4) -->
-      <div style="background: #FFFFFF; border: 1px dashed var(--color-border); border-radius: 14px; padding: 24px; display: flex; flex-direction: column; justify-content: space-between;">
+      <!-- Offers & Deals (Phase 4) -->
+      <div class="dash-card-interactive">
         <div>
-          <div style="font-size: 1.8rem; margin-bottom: 12px;">📝</div>
-          <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 6px;">Post Procurement Demand</h3>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <div style="font-size: 1.8rem;">💼</div>
+            <span class="badge-pill badge-live">● Deal Tracker</span>
+          </div>
+          <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--color-text-dark); margin-bottom: 6px;">
+            Offers & Settlement
+          </h3>
           <p style="color: var(--color-text-muted); font-size: 0.875rem; margin-bottom: 16px;">
-            Define target crop specs, required metric tons, delivery timelines, and price ceilings for automated matching.
+            Track submitted purchase offers, farmer responses, and active procurement transactions.
           </p>
+          <div style="background: var(--color-bg); padding: 8px 12px; border-radius: 8px; font-size: 0.82rem; margin-bottom: 16px;">
+            Offers Status: <span style="color: var(--color-primary); font-weight: 700;">Live Tracking</span>
+          </div>
         </div>
         <div>
-          <span style="font-size: 0.8rem; font-weight: 700; color: #B45309; background: #FEF7EA; padding: 4px 10px; border-radius: 6px; display: inline-block;">
-            Phase 4 Upcoming
-          </span>
+          <a href="offers.html" class="btn-primary-sm" style="width: 100%; justify-content: center; text-decoration: none; box-sizing: border-box;">
+            Manage Offers →
+          </a>
         </div>
+      </div>
+    </div>
+
+    <!-- Section: My Posted Requirements -->
+    <div style="background: #FFFFFF; border: 1px solid var(--color-border); border-radius: 16px; padding: 28px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 40px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; margin-bottom: 20px;">
+        <div>
+          <span style="color: var(--color-secondary); font-weight: 700; font-size: 0.8rem; text-transform: uppercase;">
+            Commercial Procurement Orders
+          </span>
+          <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--color-text-dark); margin-top: 2px;">
+            My Posted Requirements
+          </h2>
+        </div>
+        <button id="postReqHeaderBtn" class="btn-primary-sm">
+          + Post New Requirement
+        </button>
+      </div>
+
+      <div id="reqsLoadingState" style="text-align: center; padding: 40px; color: var(--color-text-muted);">
+        Loading your posted requirements...
+      </div>
+
+      <div id="reqsEmptyState" style="display: none; text-align: center; padding: 40px; border: 2px dashed var(--color-border); border-radius: 12px;">
+        <div style="font-size: 2.5rem; margin-bottom: 10px;">📋</div>
+        <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 6px;">No Procurement Requirements Posted</h4>
+        <p style="color: var(--color-text-muted); font-size: 0.9rem; max-width: 440px; margin: 0 auto 16px;">
+          Define your target commodity, volume, and budget to let our matching engine connect you with verified farm harvests.
+        </p>
+        <button id="emptyPostBtn" class="btn-primary-sm">
+          + Post Your First Requirement
+        </button>
+      </div>
+
+      <div id="reqsTableWrapper" style="display: none; overflow-x: auto;">
+        <table class="mandi-price-table">
+          <thead>
+            <tr>
+              <th>Commodity</th>
+              <th>Quantity Needed</th>
+              <th>Quality Specs</th>
+              <th>Max Price Ceiling</th>
+              <th>Needed By</th>
+              <th>Status</th>
+              <th style="text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="reqsTableBody"></tbody>
+        </table>
       </div>
     </div>
   </main>
 
+  <!-- Post Requirement Modal -->
+  <div id="postReqModal" class="farmos-modal-overlay">
+    <div class="farmos-modal-card">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+        <div>
+          <span style="color: #B45309; font-weight: 700; font-size: 0.8rem; text-transform: uppercase;">
+            Procurement Demand
+          </span>
+          <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--color-text-dark);">
+            Post Crop Requirement
+          </h2>
+        </div>
+        <button id="closePostModalBtn" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--color-text-muted);">
+          ✕
+        </button>
+      </div>
+
+      <form id="postReqForm">
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <div>
+            <label class="filter-label" for="reqCropSelect" style="display: block; margin-bottom: 6px;">
+              Target Commodity / Crop *
+            </label>
+            <select id="reqCropSelect" class="filter-select" required>
+              <option value="">Select commodity...</option>
+            </select>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div>
+              <label class="filter-label" for="reqQuantity" style="display: block; margin-bottom: 6px;">
+                Quantity Needed *
+              </label>
+              <input type="number" id="reqQuantity" class="filter-input" placeholder="e.g. 200" min="1" step="any" required>
+            </div>
+            <div>
+              <label class="filter-label" for="reqUnit" style="display: block; margin-bottom: 6px;">
+                Unit *
+              </label>
+              <select id="reqUnit" class="filter-select" required>
+                <option value="quintal" selected>quintal (100 kg)</option>
+                <option value="ton">ton (1000 kg)</option>
+                <option value="crate">crate</option>
+                <option value="kg">kg</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="filter-label" for="reqSpec" style="display: block; margin-bottom: 6px;">
+              Quality Specs & Preferences
+            </label>
+            <input type="text" id="reqSpec" class="filter-input" placeholder="e.g. Grade A, Moisture < 12%, Nashik/Pune origin">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div>
+              <label class="filter-label" for="reqMaxPrice" style="display: block; margin-bottom: 6px;">
+                Max Budget Price (₹ / unit)
+              </label>
+              <input type="number" id="reqMaxPrice" class="filter-input" placeholder="e.g. 2300" min="0" step="any">
+              <span style="font-size: 0.75rem; color: var(--color-text-muted);">Optional price ceiling</span>
+            </div>
+            <div>
+              <label class="filter-label" for="reqNeededBy" style="display: block; margin-bottom: 6px;">
+                Fulfillment Needed By *
+              </label>
+              <input type="date" id="reqNeededBy" class="filter-input" required>
+            </div>
+          </div>
+
+          <div id="postModalError" style="display: none; padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; background: var(--color-error-bg); color: var(--color-error); border: 1px solid var(--color-error-border);"></div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px;">
+            <button type="button" id="cancelPostBtn" class="btn-secondary-sm">
+              Cancel
+            </button>
+            <button type="submit" id="submitReqBtn" class="btn-primary-sm">
+              Publish Requirement
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script type="module">
     import { getSupabase } from '../js/supabaseClient.js';
 
+    let supabase;
+    let currentUser = null;
+    let myRequirements = [];
+    let cropsList = [];
+
     document.addEventListener('DOMContentLoaded', async () => {
-      const cached = localStorage.getItem('farmos_user');
-      let userData = cached ? JSON.parse(cached) : null;
+      try {
+        supabase = getSupabase();
+      } catch (e) {
+        console.error('Supabase init failed:', e);
+        return;
+      }
+
+      // Check session
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session || !session.user) {
+        const cached = localStorage.getItem('farmos_user');
+        if (!cached) {
+          window.location.href = 'buyer-login.html';
+          return;
+        }
+        currentUser = JSON.parse(cached);
+      } else {
+        currentUser = session.user;
+      }
+
+      // Load Profile
+      try {
+        const { data: profile } = await supabase
+          .from('buyers')
+          .select('*')
+          .eq('id', currentUser.id)
+          .single();
+        if (profile) {
+          document.getElementById('welcomeTitle').textContent = `Welcome, ${profile.company_name || profile.name || 'Buyer'}!`;
+          document.getElementById('userNavDisplay').textContent = profile.name || profile.company_name || 'Buyer';
+          document.getElementById('profileCompany').textContent = profile.company_name || '—';
+          document.getElementById('profileType').textContent = (profile.buyer_type || 'Individual').toUpperCase();
+          document.getElementById('profileEmail').textContent = profile.email || currentUser.email || '—';
+          document.getElementById('profilePhone').textContent = profile.phone || '—';
+        }
+      } catch (e) {}
+
+      // Default needed-by date (+14 days)
+      const defaultDate = new Date();
+      defaultDate.setDate(defaultDate.getDate() + 14);
+      document.getElementById('reqNeededBy').value = defaultDate.toISOString().split('T')[0];
+
+      // Load Crops
+      await loadCrops();
+
+      // Load Total Active Lots for counter
+      await loadActiveLotsCount();
+
+      // Load Buyer Requirements
+      await loadBuyerRequirements();
+
+      // Setup Listeners
+      setupListeners();
+    });
+
+    async function loadCrops() {
+      try {
+        const { data, error } = await supabase.from('crops').select('*').order('name');
+        if (error) throw error;
+        cropsList = data || [];
+        const select = document.getElementById('reqCropSelect');
+        select.innerHTML = '<option value="">Select commodity...</option>' +
+          cropsList.map(c => `<option value="${c.id}" data-unit="${c.unit}">${c.name} (${c.category})</option>`).join('');
+
+        select.addEventListener('change', () => {
+          const opt = select.options[select.selectedIndex];
+          const unit = opt.getAttribute('data-unit');
+          if (unit) {
+            const unitSelect = document.getElementById('reqUnit');
+            for (let i = 0; i < unitSelect.options.length; i++) {
+              if (unitSelect.options[i].value === unit) {
+                unitSelect.selectedIndex = i;
+                break;
+              }
+            }
+          }
+        });
+      } catch (e) {
+        console.error('Failed to load crops:', e);
+      }
+    }
+
+    async function loadActiveLotsCount() {
+      try {
+        const { count, error } = await supabase
+          .from('lots')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'active');
+        if (!error && count !== null) {
+          document.getElementById('dashTotalActiveLots').textContent = `${count} Lots Available`;
+        }
+      } catch (e) {}
+    }
+
+    async function loadBuyerRequirements() {
+      const loading = document.getElementById('reqsLoadingState');
+      const empty = document.getElementById('reqsEmptyState');
+      const wrapper = document.getElementById('reqsTableWrapper');
+      const tbody = document.getElementById('reqsTableBody');
+
+      loading.style.display = 'block';
+      empty.style.display = 'none';
+      wrapper.style.display = 'none';
 
       try {
-        const client = getSupabase();
-        const { data: { session } } = await client.auth.getSession();
-        
-        if (session && session.user) {
-          const user = session.user;
-          const { data: profile } = await client
-            .from('buyers')
-            .select('*')
-            .eq('id', user.id)
-            .single();
+        const { data, error } = await supabase
+          .from('buyer_requirements')
+          .select('*, crops(name, category, unit)')
+          .eq('buyer_id', currentUser.id)
+          .order('created_at', { ascending: false });
 
-          if (profile) {
-            userData = { ...profile, email: user.email };
-            localStorage.setItem('farmos_user', JSON.stringify(userData));
-          } else if (!userData) {
-            userData = {
-              name: user.user_metadata?.name || 'Buyer',
-              company_name: user.user_metadata?.company_name || '—',
-              buyer_type: user.user_metadata?.buyer_type || 'individual',
-              email: user.email,
-              phone: user.user_metadata?.phone || '—'
-            };
-          }
+        if (error) throw error;
+        myRequirements = data || [];
+
+        const activeCount = myRequirements.filter(r => r.status === 'active').length;
+        document.getElementById('dashBuyerReqsCount').textContent = `${activeCount} Active`;
+
+        loading.style.display = 'none';
+
+        if (myRequirements.length === 0) {
+          empty.style.display = 'block';
+          wrapper.style.display = 'none';
+          return;
         }
-      } catch (e) {
-        console.warn('Buyer session verification:', e);
+
+        empty.style.display = 'none';
+        wrapper.style.display = 'block';
+
+        tbody.innerHTML = myRequirements.map(req => {
+          const cName = req.crops?.name || 'Produce';
+          const maxP = req.max_price ? `₹ ${Number(req.max_price).toLocaleString('en-IN')}` : 'Open / Market';
+          const needed = req.needed_by ? new Date(req.needed_by).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+          const statusClass = req.status === 'active' ? 'badge-status-active' : (req.status === 'fulfilled' ? 'badge-status-sold' : 'badge-status-expired');
+
+          return `
+            <tr>
+              <td><strong>${cName}</strong></td>
+              <td>${Number(req.quantity_needed).toLocaleString('en-IN')} ${req.unit}</td>
+              <td style="color: var(--color-text-muted);">${req.quality_spec || 'Standard'}</td>
+              <td style="font-weight: 700; color: var(--color-primary);">${maxP}</td>
+              <td>${needed}</td>
+              <td><span class="badge-pill ${statusClass}">${req.status.toUpperCase()}</span></td>
+              <td style="text-align: right;">
+                <a href="matches.html?req_id=${req.id}" class="btn-accent-sm" style="font-size: 0.78rem; padding: 4px 10px; text-decoration: none;">
+                  🎯 Matches
+                </a>
+                <button class="delete-req-btn" data-id="${req.id}" style="background: none; border: none; color: #DC2626; cursor: pointer; font-size: 0.8rem; font-weight: 600; margin-left: 8px;">
+                  ✕
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        tbody.querySelectorAll('.delete-req-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const reqId = btn.getAttribute('data-id');
+            if (!confirm('Cancel/delete this requirement?')) return;
+            try {
+              const { error } = await supabase.from('buyer_requirements').delete().eq('id', reqId);
+              if (error) throw error;
+              await loadBuyerRequirements();
+            } catch (e) {
+              alert('Failed to delete requirement: ' + e.message);
+            }
+          });
+        });
+      } catch (err) {
+        console.error('Error fetching buyer requirements:', err);
+        loading.innerHTML = `<span style="color: var(--color-error);">Error loading requirements: ${err.message}</span>`;
       }
+    }
 
-      if (userData) {
-        const displayName = userData.name || userData.company_name || 'Buyer';
-        document.getElementById('welcomeTitle').textContent = `Welcome, ${displayName}!`;
-        document.getElementById('userNavDisplay').textContent = displayName;
-        document.getElementById('profileCompany').textContent = userData.company_name || '—';
-        document.getElementById('profileType').textContent = (userData.buyer_type || 'Individual').toUpperCase();
-        document.getElementById('profileEmail').textContent = userData.email || '—';
-        document.getElementById('profilePhone').textContent = userData.phone || '—';
+    function setupListeners() {
+      const modal = document.getElementById('postReqModal');
+      const openModal = () => {
+        document.getElementById('postModalError').style.display = 'none';
+        modal.classList.add('active');
+      };
+      const closeModal = () => modal.classList.remove('active');
 
-        // Load total active produce lots count
+      document.getElementById('openPostReqBtn').addEventListener('click', openModal);
+      document.getElementById('postReqHeaderBtn').addEventListener('click', openModal);
+      document.getElementById('emptyPostBtn')?.addEventListener('click', openModal);
+      document.getElementById('closePostModalBtn').addEventListener('click', closeModal);
+      document.getElementById('cancelPostBtn').addEventListener('click', closeModal);
+
+      // Form Submit
+      const form = document.getElementById('postReqForm');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const errorBox = document.getElementById('postModalError');
+        const submitBtn = document.getElementById('submitReqBtn');
+        errorBox.style.display = 'none';
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Publishing...';
+
         try {
-          const client = getSupabase();
-          const { count, error } = await client
-            .from('lots')
-            .select('*', { count: 'exact', head: true })
-            .eq('status', 'active');
-          if (!error && count !== null) {
-            document.getElementById('dashTotalActiveLots').textContent = `${count} Lots Available`;
-          } else {
-            document.getElementById('dashTotalActiveLots').textContent = '0 Lots Available';
-          }
+          const cropId = document.getElementById('reqCropSelect').value;
+          const quantity = parseFloat(document.getElementById('reqQuantity').value);
+          const unit = document.getElementById('reqUnit').value;
+          const qualitySpec = document.getElementById('reqSpec').value.trim();
+          const maxPriceRaw = document.getElementById('reqMaxPrice').value;
+          const maxPrice = maxPriceRaw ? parseFloat(maxPriceRaw) : null;
+          const neededBy = document.getElementById('reqNeededBy').value;
+
+          if (!cropId) throw new Error('Please choose a crop commodity.');
+          if (!quantity || quantity <= 0) throw new Error('Quantity needed must be greater than 0.');
+
+          const payload = {
+            buyer_id: currentUser.id,
+            crop_id: cropId,
+            quantity_needed: quantity,
+            unit: unit,
+            quality_spec: qualitySpec,
+            max_price: maxPrice,
+            needed_by: neededBy,
+            status: 'active'
+          };
+
+          const { error } = await supabase.from('buyer_requirements').insert([payload]);
+          if (error) throw error;
+
+          closeModal();
+          form.reset();
+          await loadBuyerRequirements();
         } catch (err) {
-          document.getElementById('dashTotalActiveLots').textContent = '0 Lots Available';
+          console.error('Failed to post requirement:', err);
+          errorBox.textContent = err.message || 'Failed to publish requirement.';
+          errorBox.style.display = 'block';
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Publish Requirement';
         }
-      }
+      });
 
+      // Logout
       document.getElementById('logoutBtn').addEventListener('click', async () => {
-        try {
-          const client = getSupabase();
-          await client.auth.signOut();
-        } catch (err) {}
+        try { await supabase.auth.signOut(); } catch (err) {}
         localStorage.removeItem('farmos_user');
         window.location.href = 'buyer-login.html';
       });
-    });
+    }
   </script>
 </body>
 </html>

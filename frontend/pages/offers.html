@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offers & Transactions — FarmOS</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="dash-page">
+  <!-- Dynamic Navbar -->
+  <nav class="dash-navbar" id="offersNavbar">
+    <div class="dash-nav-left">
+      <a href="../index.html" class="brand-logo-badge" style="color: #FFFFFF;">
+        <div class="leaf-icon">🌿</div>
+        <span>FarmOS</span>
+      </a>
+      <a id="offersBackBtn" href="farmer-dashboard.html" style="background: rgba(255, 255, 255, 0.15); padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: #FFFFFF; text-decoration: none;">
+        ← Back to Portal
+      </a>
+      <a href="matches.html" style="background: rgba(255, 255, 255, 0.15); padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: #FFFFFF; text-decoration: none;">
+        🎯 Matchmaking
+      </a>
+      <a href="market-prices.html" style="background: rgba(244, 185, 66, 0.2); border: 1px solid rgba(244, 185, 66, 0.4); padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: var(--color-accent); text-decoration: none;">
+        📊 Mandi Rates
+      </a>
+    </div>
+    <div class="dash-user-menu">
+      <span id="offersRoleDisplay" style="font-size: 0.85rem; font-weight: 600; background: rgba(255, 255, 255, 0.1); padding: 4px 10px; border-radius: 6px;">
+        Deal Ledger
+      </span>
+      <button id="logoutBtn" class="dash-btn-logout">Sign Out</button>
+    </div>
+  </nav>
+
+  <main class="dash-main" style="max-width: 1100px;">
+    <!-- Page Header -->
+    <div style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 20px; margin-bottom: 28px;">
+      <div>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+          <span style="color: var(--color-secondary); font-weight: 700; font-size: 0.85rem; letter-spacing: 0.06em; text-transform: uppercase;">
+            Trade Negotiation & Deal Settlement
+          </span>
+          <span class="badge-pill badge-live">● Deal Lifecycle</span>
+        </div>
+        <h1 style="font-size: 2.2rem; font-weight: 800; color: var(--color-text-dark);">
+          Trade Offers & Settlements
+        </h1>
+        <p style="color: var(--color-text-muted); font-size: 1rem; max-width: 680px;">
+          Review binding purchase bids, execute bilateral trade acceptance, and track execution through transaction settlement.
+        </p>
+      </div>
+
+      <!-- Role Perspective Selector -->
+      <div style="background: #FFFFFF; border: 1px solid var(--color-border); border-radius: 12px; padding: 6px; display: flex; gap: 6px;">
+        <button id="viewFarmerOffersBtn" class="btn-primary-sm" style="font-size: 0.85rem; padding: 8px 14px;">
+          👨‍🌾 Received (Farmer)
+        </button>
+        <button id="viewBuyerOffersBtn" class="btn-secondary-sm" style="font-size: 0.85rem; padding: 8px 14px;">
+          🏢 Sent (Buyer)
+        </button>
+      </div>
+    </div>
+
+    <!-- Summary Stats Strip -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 28px;">
+      <div style="background: #FFFFFF; border: 1px solid var(--color-border); border-radius: 12px; padding: 18px 20px;">
+        <div style="font-size: 0.78rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase;">Total Offers</div>
+        <div id="statTotalOffers" style="font-size: 1.8rem; font-weight: 800; color: var(--color-text-dark); margin-top: 4px;">0</div>
+      </div>
+      <div style="background: #FFFFFF; border: 1px solid var(--color-border); border-radius: 12px; padding: 18px 20px;">
+        <div style="font-size: 0.78rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase;">Pending Review</div>
+        <div id="statPendingOffers" style="font-size: 1.8rem; font-weight: 800; color: #B45309; margin-top: 4px;">0</div>
+      </div>
+      <div style="background: #FFFFFF; border: 1px solid var(--color-border); border-radius: 12px; padding: 18px 20px;">
+        <div style="font-size: 0.78rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase;">Accepted & In-Progress</div>
+        <div id="statAcceptedOffers" style="font-size: 1.8rem; font-weight: 800; color: #16A34A; margin-top: 4px;">0</div>
+      </div>
+      <div style="background: #FFFFFF; border: 1px solid var(--color-border); border-radius: 12px; padding: 18px 20px;">
+        <div style="font-size: 0.78rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase;">Total Trade Volume</div>
+        <div id="statTradeValue" style="font-size: 1.8rem; font-weight: 800; color: var(--color-primary); margin-top: 4px;">₹ 0</div>
+      </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-controls-bar">
+      <div class="filter-group">
+        <label class="filter-label" for="filterOfferStatus">Filter Status</label>
+        <select id="filterOfferStatus" class="filter-select">
+          <option value="all">All Offers</option>
+          <option value="pending" selected>Pending Action</option>
+          <option value="accepted">Accepted / In Settlement</option>
+          <option value="countered">Countered</option>
+          <option value="rejected">Rejected</option>
+        </select>
+      </div>
+
+      <div style="display: flex; align-items: flex-end; padding-bottom: 2px;">
+        <button id="refreshOffersBtn" class="btn-secondary-sm">
+          🔄 Refresh Offers
+        </button>
+      </div>
+    </div>
+
+    <!-- Offers Container -->
+    <div id="offersLoading" style="text-align: center; padding: 60px 20px; background: #FFFFFF; border: 1px solid var(--color-border); border-radius: 14px;">
+      <div style="font-size: 2rem; margin-bottom: 12px;">⏳</div>
+      <div style="font-size: 1.1rem; font-weight: 700;">Loading trade offer records...</div>
+      <div style="color: var(--color-text-muted); font-size: 0.9rem;">Connecting to Supabase deal ledger</div>
+    </div>
+
+    <div id="offersEmpty" style="display: none; text-align: center; padding: 60px 20px; background: #FFFFFF; border: 2px dashed var(--color-border); border-radius: 14px;">
+      <div style="font-size: 3rem; margin-bottom: 16px;">💼</div>
+      <h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 8px;">No trade offers found</h3>
+      <p style="color: var(--color-text-muted); max-width: 480px; margin: 0 auto 20px;">
+        No offers currently match your selected view or status filter. Use the Matchmaking engine to discover compatible buyers and submit bids.
+      </p>
+      <a href="matches.html" class="btn-primary-sm" style="text-decoration: none;">
+        🎯 Open Matchmaking Engine
+      </a>
+    </div>
+
+    <div id="offersList" style="display: flex; flex-direction: column; gap: 18px;"></div>
+  </main>
+
+  <!-- Counter Offer Modal -->
+  <div id="counterModal" class="farmos-modal-overlay">
+    <div class="farmos-modal-card">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+        <div>
+          <span style="color: var(--color-secondary); font-weight: 700; font-size: 0.8rem; text-transform: uppercase;">
+            Offer Negotiation
+          </span>
+          <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--color-text-dark);">
+            Submit Counter-Offer
+          </h2>
+        </div>
+        <button id="closeCounterModalBtn" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--color-text-muted);">
+          ✕
+        </button>
+      </div>
+
+      <form id="counterForm">
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <div>
+            <label class="filter-label" for="counterPriceInput" style="display: block; margin-bottom: 6px;">
+              Your Counter Rate (₹ / unit) *
+            </label>
+            <input type="number" id="counterPriceInput" class="filter-input" placeholder="e.g. 2350" min="1" step="any" required>
+          </div>
+          <div>
+            <label class="filter-label" for="counterNoteInput" style="display: block; margin-bottom: 6px;">
+              Counter Note to Buyer
+            </label>
+            <textarea id="counterNoteInput" class="filter-input" rows="3" placeholder="e.g. Can supply top-grade batch if farmgate pickup is arranged this week."></textarea>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px;">
+            <button type="button" id="cancelCounterBtn" class="btn-secondary-sm">Cancel</button>
+            <button type="submit" id="submitCounterBtn" class="btn-primary-sm">Submit Counter</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module">
+    import { getSupabase } from '../js/supabaseClient.js';
+
+    let supabase;
+    let currentUser = null;
+    let currentRole = 'farmer'; // 'farmer' or 'buyer'
+    let allOffers = [];
+    let activeCounterOfferId = null;
+
+    function formatINR(val) {
+      if (val === null || val === undefined || isNaN(val)) return '—';
+      return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val);
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        supabase = getSupabase();
+      } catch (e) {
+        console.error('Supabase init failed:', e);
+      }
+
+      const cached = localStorage.getItem('farmos_user');
+      if (cached) {
+        try {
+          currentUser = JSON.parse(cached);
+          if (currentUser.buyer_type || currentUser.company_name) {
+            currentRole = 'buyer';
+          } else {
+            currentRole = 'farmer';
+          }
+        } catch (e) {}
+      }
+
+      setupRoleUI();
+      await loadOffers();
+      setupEventListeners();
+    });
+
+    function setupRoleUI() {
+      const backBtn = document.getElementById('offersBackBtn');
+      const navbar = document.getElementById('offersNavbar');
+      const roleDisplay = document.getElementById('offersRoleDisplay');
+
+      if (currentRole === 'buyer') {
+        backBtn.href = 'buyer-dashboard.html';
+        backBtn.textContent = '← Buyer Portal';
+        navbar.style.backgroundColor = '#163628';
+        roleDisplay.textContent = 'Buyer Deal Portal';
+        document.getElementById('viewBuyerOffersBtn').className = 'btn-primary-sm';
+        document.getElementById('viewFarmerOffersBtn').className = 'btn-secondary-sm';
+      } else {
+        backBtn.href = 'farmer-dashboard.html';
+        backBtn.textContent = '← Farmer Portal';
+        navbar.style.backgroundColor = '#1B4332';
+        roleDisplay.textContent = 'Farmer Deal Portal';
+        document.getElementById('viewFarmerOffersBtn').className = 'btn-primary-sm';
+        document.getElementById('viewBuyerOffersBtn').className = 'btn-secondary-sm';
+      }
+    }
+
+    async function loadOffers() {
+      const loading = document.getElementById('offersLoading');
+      const empty = document.getElementById('offersEmpty');
+      const list = document.getElementById('offersList');
+
+      loading.style.display = 'block';
+      empty.style.display = 'none';
+      list.innerHTML = '';
+
+      try {
+        let query = supabase
+          .from('offers')
+          .select('*, lots(*, crops(name, category, unit)), buyers(id, name, company_name, phone, buyer_type), farmers(id, name, phone, village, district, state)')
+          .order('created_at', { ascending: false });
+
+        if (currentUser) {
+          if (currentRole === 'farmer') {
+            query = query.eq('farmer_id', currentUser.id);
+          } else {
+            query = query.eq('buyer_id', currentUser.id);
+          }
+        }
+
+        const { data, error } = await query;
+        if (error) throw error;
+        allOffers = data || [];
+
+        updateStats();
+        renderOffers();
+      } catch (err) {
+        console.error('Failed to load offers:', err);
+        loading.innerHTML = `<span style="color: var(--color-error);">Error loading offers: ${err.message}</span>`;
+      }
+    }
+
+    function updateStats() {
+      const total = allOffers.length;
+      const pending = allOffers.filter(o => o.status === 'pending').length;
+      const accepted = allOffers.filter(o => o.status === 'accepted').length;
+      const tradeVal = allOffers
+        .filter(o => o.status === 'accepted')
+        .reduce((sum, o) => sum + (Number(o.offered_price) * Number(o.quantity)), 0);
+
+      document.getElementById('statTotalOffers').textContent = total;
+      document.getElementById('statPendingOffers').textContent = pending;
+      document.getElementById('statAcceptedOffers').textContent = accepted;
+      document.getElementById('statTradeValue').textContent = formatINR(tradeVal);
+    }
+
+    function renderOffers() {
+      const loading = document.getElementById('offersLoading');
+      const empty = document.getElementById('offersEmpty');
+      const list = document.getElementById('offersList');
+
+      loading.style.display = 'none';
+
+      const statusFilter = document.getElementById('filterOfferStatus').value;
+      const filtered = allOffers.filter(o => {
+        if (statusFilter !== 'all' && o.status !== statusFilter) return false;
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        empty.style.display = 'block';
+        return;
+      }
+
+      empty.style.display = 'none';
+
+      list.innerHTML = filtered.map(offer => {
+        const lot = offer.lots || {};
+        const cropName = lot.crops?.name || 'Produce Lot';
+        const unit = lot.unit || 'quintal';
+        const buyer = offer.buyers || {};
+        const farmer = offer.farmers || {};
+
+        const buyerName = buyer.company_name || buyer.name || 'Commercial Procurement Buyer';
+        const farmerName = farmer.name || 'Verified Farmer';
+
+        const totalOfferedVal = formatINR(Number(offer.offered_price) * Number(offer.quantity));
+        const dateStr = offer.created_at ? new Date(offer.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Today';
+
+        const statusPills = {
+          pending: '<span class="badge-pill badge-grade">PENDING REVIEW</span>',
+          accepted: '<span class="badge-pill badge-status-active">ACCEPTED / IN PROGRESS</span>',
+          rejected: '<span class="badge-pill badge-status-expired">REJECTED</span>',
+          countered: '<span class="badge-pill" style="background: #EDE9FE; color: #5B21B6;">COUNTERED</span>'
+        };
+
+        const statusBadge = statusPills[offer.status] || `<span class="badge-pill">${offer.status.toUpperCase()}</span>`;
+
+        return `
+          <div style="background: #FFFFFF; border: 1px solid var(--color-border); border-radius: 16px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <!-- Header -->
+            <div style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+              <div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span style="font-size: 1.25rem; font-weight: 800; color: var(--color-text-dark);">
+                    Offer for ${cropName} (${offer.quantity} ${unit})
+                  </span>
+                  ${statusBadge}
+                </div>
+                <div style="font-size: 0.85rem; color: var(--color-text-muted); margin-top: 2px;">
+                  Submitted on ${dateStr} · Offer ID: #${offer.id.slice(0, 8)}
+                </div>
+              </div>
+
+              <div style="text-align: right;">
+                <div style="font-size: 0.78rem; text-transform: uppercase; font-weight: 700; color: var(--color-text-muted);">
+                  Offered Settlement Value
+                </div>
+                <div style="font-size: 1.5rem; font-weight: 800; color: var(--color-primary);">
+                  ${totalOfferedVal}
+                </div>
+              </div>
+            </div>
+
+            <!-- Trade Terms Grid -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; background: var(--color-bg); border-radius: 12px; padding: 16px; margin-bottom: 16px; font-size: 0.88rem;">
+              <div>
+                <span style="display: block; font-size: 0.72rem; text-transform: uppercase; color: var(--color-text-muted); font-weight: 700;">Counterparty</span>
+                <strong style="color: var(--color-text-dark);">${currentRole === 'farmer' ? `Buyer: ${buyerName}` : `Farmer: ${farmerName}`}</strong>
+                <div style="font-size: 0.8rem; color: var(--color-text-muted);">${currentRole === 'farmer' ? (buyer.buyer_type || 'Trader') : (farmer.district || 'Maharashtra')}</div>
+              </div>
+
+              <div>
+                <span style="display: block; font-size: 0.72rem; text-transform: uppercase; color: var(--color-text-muted); font-weight: 700;">Bid Rate</span>
+                <strong style="color: var(--color-primary); font-size: 1.05rem;">₹ ${Number(offer.offered_price).toLocaleString('en-IN')} / ${unit}</strong>
+                <div style="font-size: 0.8rem; color: var(--color-text-muted);">Farmer target: ₹ ${lot.price_expectation || 'Open'}</div>
+              </div>
+
+              <div>
+                <span style="display: block; font-size: 0.72rem; text-transform: uppercase; color: var(--color-text-muted); font-weight: 700;">Quantity Contract</span>
+                <strong>${Number(offer.quantity).toLocaleString('en-IN')} ${unit}</strong>
+                <div style="font-size: 0.8rem; color: var(--color-text-muted);">Lot grade: ${lot.grade || 'Standard'}</div>
+              </div>
+
+              <div>
+                <span style="display: block; font-size: 0.72rem; text-transform: uppercase; color: var(--color-text-muted); font-weight: 700;">Buyer Message</span>
+                <span style="color: var(--color-text-body); font-style: italic;">"${offer.message || 'Standard procurement contract.'}"</span>
+              </div>
+            </div>
+
+            <!-- Actions Row -->
+            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 12px; flex-wrap: wrap;">
+              ${offer.status === 'pending' && currentRole === 'farmer' ? `
+                <button class="btn-primary-sm accept-offer-btn" data-id="${offer.id}" data-price="${offer.offered_price}" data-qty="${offer.quantity}" data-buyer="${offer.buyer_id}" data-lot="${offer.lot_id}">
+                  ✓ Accept Offer & Create Transaction
+                </button>
+                <button class="btn-secondary-sm counter-offer-btn" data-id="${offer.id}">
+                  💬 Counter Offer
+                </button>
+                <button class="reject-offer-btn" data-id="${offer.id}" style="background: none; border: 1px solid var(--color-error-border); color: var(--color-error); font-weight: 700; font-size: 0.85rem; padding: 8px 14px; border-radius: 8px; cursor: pointer;">
+                  ✕ Reject
+                </button>
+              ` : ''}
+
+              ${offer.status === 'accepted' ? `
+                <a href="transaction-detail.html?offer_id=${offer.id}" class="btn-primary-sm" style="text-decoration: none;">
+                  📄 View Transaction & Settlement →
+                </a>
+              ` : ''}
+
+              ${offer.status === 'pending' && currentRole === 'buyer' ? `
+                <span style="font-size: 0.85rem; color: #B45309; font-weight: 600;">
+                  ⏳ Waiting for farmer to accept or counter
+                </span>
+              ` : ''}
+
+              ${offer.status === 'countered' && currentRole === 'buyer' ? `
+                <button class="btn-accent-sm accept-counter-btn" data-id="${offer.id}">
+                  ✓ Accept Counter Offer
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      attachOfferActionHandlers();
+    }
+
+    function attachOfferActionHandlers() {
+      // 1. Farmer Accept Offer -> Creates Transaction
+      document.querySelectorAll('.accept-offer-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const offerId = btn.getAttribute('data-id');
+          const finalPrice = parseFloat(btn.getAttribute('data-price'));
+          const finalQuantity = parseFloat(btn.getAttribute('data-qty'));
+          const buyerId = btn.getAttribute('data-buyer');
+          const lotId = btn.getAttribute('data-lot');
+
+          if (!confirm(`Accept this offer for ₹${finalPrice}/unit? This will form a binding transaction and close the produce lot.`)) return;
+
+          btn.disabled = true;
+          btn.textContent = 'Processing Acceptance...';
+
+          try {
+            // A. Update offer status to 'accepted'
+            const { error: offerErr } = await supabase
+              .from('offers')
+              .update({ status: 'accepted' })
+              .eq('id', offerId);
+            if (offerErr) throw offerErr;
+
+            // B. Create Transaction row
+            const transactionPayload = {
+              offer_id: offerId,
+              buyer_id: buyerId,
+              farmer_id: currentUser.id,
+              final_price: finalPrice,
+              final_quantity: finalQuantity,
+              status: 'in_progress'
+            };
+
+            const { data: txData, error: txErr } = await supabase
+              .from('transactions')
+              .insert([transactionPayload])
+              .select()
+              .single();
+            if (txErr) throw txErr;
+
+            // C. Mark Lot as 'sold'
+            if (lotId) {
+              await supabase.from('lots').update({ status: 'sold' }).eq('id', lotId);
+            }
+
+            alert('✓ Offer accepted! Redirecting to transaction details...');
+            window.location.href = `transaction-detail.html?id=${txData.id}`;
+          } catch (err) {
+            console.error('Accept offer error:', err);
+            alert('Failed to accept offer: ' + err.message);
+            btn.disabled = false;
+            btn.textContent = '✓ Accept Offer & Create Transaction';
+          }
+        });
+      });
+
+      // 2. Reject Offer
+      document.querySelectorAll('.reject-offer-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const offerId = btn.getAttribute('data-id');
+          if (!confirm('Reject this purchase offer?')) return;
+          try {
+            const { error } = await supabase
+              .from('offers')
+              .update({ status: 'rejected' })
+              .eq('id', offerId);
+            if (error) throw error;
+            await loadOffers();
+          } catch (e) {
+            alert('Failed to reject offer: ' + e.message);
+          }
+        });
+      });
+
+      // 3. Counter Offer Modal
+      document.querySelectorAll('.counter-offer-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          activeCounterOfferId = btn.getAttribute('data-id');
+          document.getElementById('counterModal').classList.add('active');
+        });
+      });
+
+      // 4. Buyer Accept Counter
+      document.querySelectorAll('.accept-counter-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const offerId = btn.getAttribute('data-id');
+          if (!confirm('Accept farmer counter-terms?')) return;
+          try {
+            const { error } = await supabase.from('offers').update({ status: 'accepted' }).eq('id', offerId);
+            if (error) throw error;
+            await loadOffers();
+          } catch (e) {
+            alert('Error: ' + e.message);
+          }
+        });
+      });
+    }
+
+    function setupEventListeners() {
+      // Perspective toggle
+      document.getElementById('viewFarmerOffersBtn').addEventListener('click', () => {
+        currentRole = 'farmer';
+        setupRoleUI();
+        loadOffers();
+      });
+
+      document.getElementById('viewBuyerOffersBtn').addEventListener('click', () => {
+        currentRole = 'buyer';
+        setupRoleUI();
+        loadOffers();
+      });
+
+      // Filter & Refresh
+      document.getElementById('filterOfferStatus').addEventListener('change', renderOffers);
+      document.getElementById('refreshOffersBtn').addEventListener('click', loadOffers);
+
+      // Counter Modal controls
+      const modal = document.getElementById('counterModal');
+      const closeModal = () => modal.classList.remove('active');
+      document.getElementById('closeCounterModalBtn').addEventListener('click', closeModal);
+      document.getElementById('cancelCounterBtn').addEventListener('click', closeModal);
+
+      document.getElementById('counterForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!activeCounterOfferId) return;
+        const counterPrice = parseFloat(document.getElementById('counterPriceInput').value);
+        const note = document.getElementById('counterNoteInput').value.trim();
+
+        try {
+          const { error } = await supabase
+            .from('offers')
+            .update({
+              status: 'countered',
+              offered_price: counterPrice,
+              message: `Counter-offer: ₹${counterPrice}/unit. ${note}`
+            })
+            .eq('id', activeCounterOfferId);
+          if (error) throw error;
+          closeModal();
+          await loadOffers();
+        } catch (err) {
+          alert('Failed to submit counter: ' + err.message);
+        }
+      });
+
+      // Logout
+      document.getElementById('logoutBtn').addEventListener('click', async () => {
+        try { await supabase.auth.signOut(); } catch (e) {}
+        localStorage.removeItem('farmos_user');
+        window.location.href = currentRole === 'buyer' ? 'buyer-login.html' : 'farmer-login.html';
+      });
+    }
+  </script>
+</body>
+</html>

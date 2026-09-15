@@ -17,6 +17,18 @@
       <span style="background: rgba(255, 255, 255, 0.15); padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700;">
         FARMER PORTAL
       </span>
+      <a href="my-lots.html" style="background: rgba(255, 255, 255, 0.15); padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: #FFFFFF; text-decoration: none;">
+        📦 My Lots
+      </a>
+      <a href="matches.html" style="background: rgba(255, 255, 255, 0.15); padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: #FFFFFF; text-decoration: none;">
+        🎯 Matchmaking
+      </a>
+      <a href="offers.html" style="background: rgba(255, 255, 255, 0.15); padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: #FFFFFF; text-decoration: none;">
+        💼 Offers
+      </a>
+      <a href="market-prices.html" style="background: rgba(244, 185, 66, 0.2); border: 1px solid rgba(244, 185, 66, 0.4); padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: var(--color-accent); text-decoration: none;">
+        📊 Mandi Rates
+      </a>
     </div>
     <div class="dash-user-menu">
       <span id="userNavDisplay" style="font-size: 0.9rem; font-weight: 600;">Farmer</span>
@@ -111,19 +123,53 @@
         </div>
       </div>
 
-      <!-- Buyer Matchmaking (Phase 4/5) -->
-      <div style="background: #FFFFFF; border: 1px dashed var(--color-border); border-radius: 14px; padding: 24px; display: flex; flex-direction: column; justify-content: space-between;">
+      <!-- Buyer Matchmaking (Phase 3) -->
+      <div class="dash-card-interactive">
         <div>
-          <div style="font-size: 1.8rem; margin-bottom: 12px;">🤝</div>
-          <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 6px;">Buyer Matchmaking</h3>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <div style="font-size: 1.8rem;">🎯</div>
+            <span class="badge-pill badge-live">● Live Engine</span>
+          </div>
+          <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--color-text-dark); margin-bottom: 6px;">
+            Buyer Matchmaking
+          </h3>
           <p style="color: var(--color-text-muted); font-size: 0.875rem; margin-bottom: 16px;">
-            Direct buyer procurement requirements and automated net price realization scoring algorithm.
+            Pair your listed produce lots with verified commercial buyers based on crop, volume, grade, and price.
           </p>
+          <div style="background: var(--color-bg); padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: var(--color-text-muted); font-weight: 600;">Match Engine:</span>
+            <span style="color: var(--color-secondary); font-weight: 700;">Score Ranking Active</span>
+          </div>
         </div>
         <div>
-          <span style="font-size: 0.8rem; font-weight: 700; color: #B45309; background: #FEF7EA; padding: 4px 10px; border-radius: 6px; display: inline-block;">
-            Phase 4 & 5 Upcoming
-          </span>
+          <a href="matches.html" class="btn-accent-sm" style="width: 100%; justify-content: center; text-decoration: none; box-sizing: border-box;">
+            Find Buyer Matches →
+          </a>
+        </div>
+      </div>
+
+      <!-- Offers & Deal Ledger (Phase 4) -->
+      <div class="dash-card-interactive">
+        <div>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <div style="font-size: 1.8rem;">💼</div>
+            <span class="badge-pill badge-live">● Deal Tracker</span>
+          </div>
+          <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--color-text-dark); margin-bottom: 6px;">
+            Incoming Offers
+          </h3>
+          <p style="color: var(--color-text-muted); font-size: 0.875rem; margin-bottom: 16px;">
+            Review direct trade bids submitted by verified buyers for your active produce lots. Accept, counter, or reject.
+          </p>
+          <div style="background: var(--color-bg); padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: var(--color-text-muted); font-weight: 600;">Status:</span>
+            <span id="dashPendingOffersCount" style="color: var(--color-primary); font-weight: 700;">Active</span>
+          </div>
+        </div>
+        <div>
+          <a href="offers.html" class="btn-primary-sm" style="width: 100%; justify-content: center; text-decoration: none; box-sizing: border-box;">
+            Manage Offers →
+          </a>
         </div>
       </div>
     </div>
