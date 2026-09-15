@@ -61,6 +61,11 @@
         <div id="statCommoditySub" style="font-size: 0.78rem; color: var(--color-secondary); font-weight: 600; margin-top: 2px;">Onion (Maharashtra)</div>
       </div>
       <div style="background: #FFFFFF; border: 1px solid var(--color-border); border-radius: 12px; padding: 18px 20px;">
+        <div style="font-size: 0.78rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase;">7-Day Price Change</div>
+        <div id="stat7DayChange" style="font-size: 1.8rem; font-weight: 800; color: #16A34A; margin-top: 4px;">—</div>
+        <div id="stat7DaySub" style="font-size: 0.78rem; color: var(--color-text-muted); margin-top: 2px;">vs 7 days ago benchmark</div>
+      </div>
+      <div style="background: #FFFFFF; border: 1px solid var(--color-border); border-radius: 12px; padding: 18px 20px;">
         <div style="font-size: 0.78rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase;">30-Day Peak High</div>
         <div id="statPeakRate" style="font-size: 1.8rem; font-weight: 800; color: #15803D; margin-top: 4px;">—</div>
         <div style="font-size: 0.78rem; color: var(--color-text-muted); margin-top: 2px;">Highest mandi arrival rate</div>
@@ -355,6 +360,7 @@
         document.getElementById('statPeakRate').textContent = '—';
         document.getElementById('statFloorRate').textContent = '—';
         document.getElementById('statMandiCount').textContent = '0';
+        document.getElementById('stat7DayChange').textContent = '—';
         return;
       }
 
@@ -367,11 +373,51 @@
       const peak = highs.length > 0 ? Math.max(...highs) : 0;
       const floor = lows.length > 0 ? Math.min(...lows) : 0;
 
+      // Calculate % price change vs ~7 days ago
+      let percentChange = 0;
+      const dates = Array.from(new Set(records.map(r => r.price_date))).filter(Boolean).sort().reverse();
+      if (dates.length >= 2) {
+        const latestDate = dates[0];
+        // Target date ~7 days ago, or closest available past date
+        const targetPastDate = dates.find(d => {
+          const diffDays = Math.abs((new Date(latestDate) - new Date(d)) / (1000 * 60 * 60 * 24));
+          return diffDays >= 5 && diffDays <= 10;
+        }) || dates[dates.length - 1];
+
+        const latestPrices = records.filter(r => r.price_date === latestDate).map(r => Number(r.modal_price));
+        const pastPrices = records.filter(r => r.price_date === targetPastDate).map(r => Number(r.modal_price));
+
+        if (latestPrices.length > 0 && pastPrices.length > 0) {
+          const latAvg = latestPrices.reduce((a, b) => a + b, 0) / latestPrices.length;
+          const pstAvg = pastPrices.reduce((a, b) => a + b, 0) / pastPrices.length;
+          if (pstAvg > 0) {
+            percentChange = ((latAvg - pstAvg) / pstAvg) * 100;
+          }
+        }
+      }
+
+      const changeEl = document.getElementById('stat7DayChange');
+      const changeSub = document.getElementById('stat7DaySub');
+      if (percentChange > 0) {
+        changeEl.textContent = `+${percentChange.toFixed(1)}% ▲`;
+        changeEl.style.color = '#16A34A';
+        changeSub.textContent = 'Upward price momentum vs 7d';
+      } else if (percentChange < 0) {
+        changeEl.textContent = `${percentChange.toFixed(1)}% ▼`;
+        changeEl.style.color = '#DC2626';
+        changeSub.textContent = 'Downward price trend vs 7d';
+      } else {
+        changeEl.textContent = '0.0% ▬';
+        changeEl.style.color = '#4B5563';
+        changeSub.textContent = 'Stable price vs 7d benchmark';
+      }
+
       document.getElementById('statAvgModal').textContent = formatINR(avgModal);
       document.getElementById('statPeakRate').textContent = formatINR(peak);
       document.getElementById('statFloorRate').textContent = formatINR(floor);
       document.getElementById('statMandiCount').textContent = uniqueMandis;
     }
+
 
     function updateTrendChart() {
       const selectedCommodity = document.getElementById('filterCommodity').value;
