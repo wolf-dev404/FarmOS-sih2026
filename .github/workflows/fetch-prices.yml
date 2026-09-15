@@ -1,0 +1,44 @@
+name: Fetch APMC Market Prices
+
+on:
+  schedule:
+    # Runs daily at 04:30 UTC (10:00 AM IST), shortly after APMC mandis update morning arrival rates
+    - cron: '30 4 * * *'
+  workflow_dispatch:
+    inputs:
+      state:
+        description: 'Target State for APMC Rates'
+        required: false
+        default: 'Maharashtra'
+      limit:
+        description: 'Maximum records to fetch'
+        required: false
+        default: '500'
+
+jobs:
+  ingest-prices:
+    name: Ingest Mandi Prices from Agmarknet
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r data-pipeline/requirements.txt
+
+      - name: Run Price Ingestion Pipeline
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          AGMARKNET_API_KEY: ${{ secrets.AGMARKNET_API_KEY }}
+        run: |
+          python data-pipeline/fetch_prices.py --state "${{ github.event.inputs.state || 'Maharashtra' }}" --limit "${{ github.event.inputs.limit || '500' }}"

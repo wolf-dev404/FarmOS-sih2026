@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Explore Produce Lots — FarmOS</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="dash-page">
+  <!-- Buyer Top Navbar -->
+  <nav class="dash-navbar" style="background-color: #163628;">
+    <div class="dash-nav-left">
+      <a href="../index.html" class="brand-logo-badge" style="color: #FFFFFF;">
+        <div class="leaf-icon" style="background: var(--color-accent);">🌿</div>
+        <span>FarmOS</span>
+      </a>
+      <a href="buyer-dashboard.html" style="background: rgba(255, 255, 255, 0.15); padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: #FFFFFF; text-decoration: none;">
+        ← Buyer Portal
+      </a>
+      <a href="market-prices.html" style="background: rgba(244, 185, 66, 0.2); border: 1px solid rgba(244, 185, 66, 0.4); padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: var(--color-accent); text-decoration: none;">
+        📊 Live APMC Rates
+      </a>
+    </div>
+    <div class="dash-user-menu">
+      <span id="userNavDisplay" style="font-size: 0.9rem; font-weight: 600;">Procurement Partner</span>
+      <button id="logoutBtn" class="dash-btn-logout">Sign Out</button>
+    </div>
+  </nav>
+
+  <main class="dash-main">
+    <!-- Header -->
+    <div style="margin-bottom: 28px;">
+      <span style="color: #B45309; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.06em; text-transform: uppercase;">
+        Agricultural Sourcing Exchange
+      </span>
+      <h1 style="font-size: 2.2rem; font-weight: 800; color: var(--color-text-dark); margin-top: 4px;">
+        Explore Farm Produce Lots
+      </h1>
+      <p style="color: var(--color-text-muted); font-size: 1rem; max-width: 680px;">
+        Browse verified farmer crop inventory available for commercial purchase across Maharashtra. Filter by commodity, quality grade, and origin district.
+      </p>
+    </div>
+
+    <!-- Filter & Search Controls Bar -->
+    <div class="filter-controls-bar">
+      <div class="filter-group">
+        <label class="filter-label" for="filterCrop">Commodity</label>
+        <select id="filterCrop" class="filter-select">
+          <option value="all">All Commodities</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label" for="filterGrade">Quality Grade</label>
+        <select id="filterGrade" class="filter-select">
+          <option value="all">All Grades</option>
+          <option value="Grade A+">Grade A+ (Premium Export)</option>
+          <option value="Grade A">Grade A (Superior)</option>
+          <option value="Grade B">Grade B (Standard)</option>
+          <option value="Grade C">Grade C (Processing)</option>
+        </select>
+      </div>
+
+      <div class="filter-group" style="flex: 2 1 200px;">
+        <label class="filter-label" for="searchLocation">District / Region Search</label>
+        <input type="text" id="searchLocation" class="filter-input" placeholder="e.g. Nashik, Pune, Nagpur...">
+      </div>
+
+      <div style="display: flex; align-items: flex-end; padding-bottom: 2px; gap: 8px;">
+        <button id="resetFiltersBtn" class="btn-secondary-sm">
+          Reset
+        </button>
+        <button id="refreshLotsBtn" class="btn-primary-sm">
+          🔄 Refresh
+        </button>
+      </div>
+    </div>
+
+    <!-- Active Count Display -->
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+      <div style="font-size: 0.95rem; font-weight: 700; color: var(--color-text-dark);">
+        Showing <span id="lotsCountDisplay">0</span> active farm produce lots
+      </div>
+      <div style="font-size: 0.85rem; color: var(--color-text-muted);">
+        ● Real-time Supabase Data
+      </div>
+    </div>
+
+    <!-- Loading & Empty States -->
+    <div id="loadingState" style="text-align: center; padding: 60px 20px; background: #FFFFFF; border: 1px solid var(--color-border); border-radius: 14px;">
+      <div style="font-size: 2rem; margin-bottom: 12px;">⏳</div>
+      <div style="font-size: 1.1rem; font-weight: 700;">Loading available produce lots...</div>
+      <div style="color: var(--color-text-muted); font-size: 0.9rem;">Connecting to FarmOS exchange</div>
+    </div>
+
+    <div id="emptyState" style="display: none; text-align: center; padding: 60px 20px; background: #FFFFFF; border: 2px dashed var(--color-border); border-radius: 14px;">
+      <div style="font-size: 3rem; margin-bottom: 16px;">🌾</div>
+      <h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 8px;">No produce lots available</h3>
+      <p style="color: var(--color-text-muted); max-width: 480px; margin: 0 auto;">
+        No active lots match your current commodity or location filters. Try selecting "All Commodities" or clearing search filters.
+      </p>
+    </div>
+
+    <!-- Lots Cards Grid -->
+    <div id="buyerLotsGrid" class="lots-grid" style="display: none;"></div>
+  </main>
+
+  <!-- Farmer Contact Modal -->
+  <div id="farmerContactModal" class="farmos-modal-overlay">
+    <div class="farmos-modal-card">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+        <div>
+          <span style="color: var(--color-secondary); font-weight: 700; font-size: 0.8rem; text-transform: uppercase;">
+            Farmer Contact & Origin
+          </span>
+          <h2 id="modalCropTitle" style="font-size: 1.4rem; font-weight: 800; color: var(--color-text-dark); margin-top: 2px;">
+            Lot Procurement Details
+          </h2>
+        </div>
+        <button id="closeContactModalBtn" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--color-text-muted);">
+          ✕
+        </button>
+      </div>
+
+      <div style="background: #F8FAF9; border: 1px solid var(--color-border); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px;">
+          <div style="width: 48px; height: 48px; border-radius: 50%; background: #EAF4EE; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+            👨‍🌾
+          </div>
+          <div>
+            <div id="contactFarmerName" style="font-size: 1.15rem; font-weight: 800; color: var(--color-text-dark);">
+              Farmer Name
+            </div>
+            <div style="font-size: 0.85rem; color: var(--color-secondary); font-weight: 600;">
+              ● Verified Maharashtra Producer
+            </div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.9rem;">
+          <div>
+            <span style="display: block; font-size: 0.75rem; color: var(--color-text-muted); font-weight: 700; text-transform: uppercase;">Direct Phone</span>
+            <strong id="contactFarmerPhone" style="font-size: 1rem; color: var(--color-text-dark);">—</strong>
+          </div>
+          <div>
+            <span style="display: block; font-size: 0.75rem; color: var(--color-text-muted); font-weight: 700; text-transform: uppercase;">Farm Location</span>
+            <strong id="contactFarmerLocation" style="font-size: 0.95rem; color: var(--color-text-dark);">—</strong>
+          </div>
+          <div>
+            <span style="display: block; font-size: 0.75rem; color: var(--color-text-muted); font-weight: 700; text-transform: uppercase;">Listed Quantity</span>
+            <strong id="contactLotQuantity" style="font-size: 0.95rem; color: var(--color-text-dark);">—</strong>
+          </div>
+          <div>
+            <span style="display: block; font-size: 0.75rem; color: var(--color-text-muted); font-weight: 700; text-transform: uppercase;">Target Price</span>
+            <strong id="contactLotPrice" style="font-size: 0.95rem; color: var(--color-primary);">—</strong>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <a id="phoneCallBtn" href="tel:" class="btn-primary-sm" style="justify-content: center; padding: 12px; font-size: 0.95rem; text-decoration: none;">
+          📞 Call Farmer Directly
+        </a>
+        <button id="dismissContactBtn" class="btn-secondary-sm" style="justify-content: center; padding: 10px;">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { getSupabase } from '../js/supabaseClient.js';
+
+    let supabase;
+    let allActiveLots = [];
+    let cropsMap = {};
+
+    function formatINR(val) {
+      if (val === null || val === undefined || isNaN(val)) return '—';
+      return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val);
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        supabase = getSupabase();
+      } catch (e) {
+        console.error('Supabase init failed:', e);
+        return;
+      }
+
+      // Check buyer session
+      const cached = localStorage.getItem('farmos_user');
+      if (cached) {
+        try {
+          const user = JSON.parse(cached);
+          const name = user.name || user.company_name || 'Buyer';
+          document.getElementById('userNavDisplay').textContent = name;
+        } catch (e) {}
+      }
+
+      // Load crops filter
+      await loadCropsFilter();
+
+      // Load active lots
+      await fetchActiveLots();
+
+      // Listeners
+      setupListeners();
+    });
+
+    async function loadCropsFilter() {
+      try {
+        const { data, error } = await supabase.from('crops').select('*').order('name');
+        if (error) throw error;
+        const select = document.getElementById('filterCrop');
+        (data || []).forEach(c => {
+          cropsMap[c.id] = c.name;
+          const opt = document.createElement('option');
+          opt.value = c.name.toLowerCase();
+          opt.textContent = c.name;
+          select.appendChild(opt);
+        });
+      } catch (e) {
+        console.error('Failed to load crop filter:', e);
+      }
+    }
+
+    async function fetchActiveLots() {
+      const loading = document.getElementById('loadingState');
+      const empty = document.getElementById('emptyState');
+      const grid = document.getElementById('buyerLotsGrid');
+
+      loading.style.display = 'block';
+      empty.style.display = 'none';
+      grid.style.display = 'none';
+
+      try {
+        const { data, error } = await supabase
+          .from('lots')
+          .select('*, crops(name, category, unit), farmers(name, phone, village, district, state)')
+          .eq('status', 'active')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        allActiveLots = data || [];
+        renderLots();
+      } catch (err) {
+        console.error('Failed to fetch active lots:', err);
+        loading.innerHTML = `
+          <div style="color: var(--color-error); font-weight: 700;">Could not load active lots</div>
+          <p style="color: var(--color-text-muted); font-size: 0.9rem;">${err.message}</p>
+        `;
+      }
+    }
+
+    function renderLots() {
+      const loading = document.getElementById('loadingState');
+      const empty = document.getElementById('emptyState');
+      const grid = document.getElementById('buyerLotsGrid');
+      const countEl = document.getElementById('lotsCountDisplay');
+
+      loading.style.display = 'none';
+
+      const cropVal = document.getElementById('filterCrop').value.toLowerCase();
+      const gradeVal = document.getElementById('filterGrade').value;
+      const locVal = document.getElementById('searchLocation').value.toLowerCase().trim();
+
+      const filtered = allActiveLots.filter(lot => {
+        if (cropVal !== 'all') {
+          const cName = (lot.crops?.name || '').toLowerCase();
+          if (cName !== cropVal) return false;
+        }
+
+        if (gradeVal !== 'all' && lot.grade !== gradeVal) {
+          return false;
+        }
+
+        if (locVal) {
+          const lLoc = (lot.location || '').toLowerCase();
+          const fDist = (lot.farmers?.district || '').toLowerCase();
+          const fVill = (lot.farmers?.village || '').toLowerCase();
+          if (!lLoc.includes(locVal) && !fDist.includes(locVal) && !fVill.includes(locVal)) {
+            return false;
+          }
+        }
+
+        return true;
+      });
+
+      countEl.textContent = filtered.length;
+
+      if (filtered.length === 0) {
+        empty.style.display = 'block';
+        grid.style.display = 'none';
+        return;
+      }
+
+      empty.style.display = 'none';
+      grid.style.display = 'grid';
+
+      grid.innerHTML = filtered.map(lot => {
+        const cropName = lot.crops?.name || 'Produce';
+        const cropCat = lot.crops?.category || 'Crops';
+        const unit = lot.unit || lot.crops?.unit || 'quintal';
+        const farmer = lot.farmers || {};
+        const farmerName = farmer.name || 'Verified Farmer';
+        const locationText = lot.location || [farmer.village, farmer.district, farmer.state].filter(Boolean).join(', ') || 'Maharashtra';
+        const totalEstVal = (lot.price_expectation && lot.quantity) ? formatINR(lot.price_expectation * lot.quantity) : '—';
+        const availDate = lot.available_from ? new Date(lot.available_from).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : 'Immediate';
+
+        return `
+          <div class="lot-card">
+            <div>
+              <div class="lot-card-header">
+                <div>
+                  <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--color-secondary); font-weight: 700; letter-spacing: 0.05em;">
+                    ${cropCat}
+                  </span>
+                  <div class="lot-crop-name">${cropName}</div>
+                </div>
+                <span class="badge-pill badge-live">
+                  AVAILABLE
+                </span>
+              </div>
+
+              <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;">
+                <span class="badge-pill badge-grade">${lot.grade || 'Grade A'}</span>
+                <span class="badge-pill" style="background: #F3F4F6; color: var(--color-text-dark);">
+                  📍 ${locationText}
+                </span>
+              </div>
+
+              <div class="lot-meta-grid">
+                <div class="lot-meta-item">
+                  <span class="lot-meta-label">Available Volume</span>
+                  <span class="lot-meta-val">${Number(lot.quantity).toLocaleString('en-IN')} ${unit}</span>
+                </div>
+                <div class="lot-meta-item">
+                  <span class="lot-meta-label">Target Rate</span>
+                  <span class="lot-meta-val" style="color: var(--color-primary);">${lot.price_expectation ? '₹ ' + Number(lot.price_expectation).toLocaleString('en-IN') + '/' + unit : 'Negotiable'}</span>
+                </div>
+                <div class="lot-meta-item">
+                  <span class="lot-meta-label">Estimated Lot Total</span>
+                  <span class="lot-meta-val">${totalEstVal}</span>
+                </div>
+                <div class="lot-meta-item">
+                  <span class="lot-meta-label">Available Date</span>
+                  <span class="lot-meta-val">${availDate}</span>
+                </div>
+              </div>
+
+              <div style="font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 8px;">
+                Farmer: <strong style="color: var(--color-text-dark);">${farmerName}</strong>
+              </div>
+            </div>
+
+            <div class="lot-footer-actions">
+              <button class="btn-accent-sm contact-farmer-btn" data-lot='${JSON.stringify(lot).replace(/'/g, "&apos;")}' style="width: 100%; justify-content: center; padding: 10px;">
+                🤝 Connect with Farmer
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Wire up contact farmer buttons
+      grid.querySelectorAll('.contact-farmer-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const raw = btn.getAttribute('data-lot');
+          try {
+            const lot = JSON.parse(raw);
+            openContactModal(lot);
+          } catch (e) {
+            console.error('Failed to parse lot data:', e);
+          }
+        });
+      });
+    }
+
+    function openContactModal(lot) {
+      const modal = document.getElementById('farmerContactModal');
+      const cropName = lot.crops?.name || 'Produce';
+      const unit = lot.unit || 'quintal';
+      const farmer = lot.farmers || {};
+
+      document.getElementById('modalCropTitle').textContent = `${cropName} — Lot #${lot.id.slice(0, 8)}`;
+      document.getElementById('contactFarmerName').textContent = farmer.name || 'Verified Farmer';
+      document.getElementById('contactFarmerPhone').textContent = farmer.phone || 'Phone upon offer';
+      document.getElementById('contactFarmerLocation').textContent = lot.location || [farmer.village, farmer.district, farmer.state].filter(Boolean).join(', ') || 'Maharashtra';
+      document.getElementById('contactLotQuantity').textContent = `${lot.quantity} ${unit} (${lot.grade || 'Grade A'})`;
+      document.getElementById('contactLotPrice').textContent = lot.price_expectation ? `₹ ${lot.price_expectation} / ${unit}` : 'Negotiable';
+
+      const callBtn = document.getElementById('phoneCallBtn');
+      if (farmer.phone) {
+        callBtn.href = `tel:${farmer.phone}`;
+        callBtn.style.display = 'inline-flex';
+      } else {
+        callBtn.style.display = 'none';
+      }
+
+      modal.classList.add('active');
+    }
+
+    function setupListeners() {
+      document.getElementById('filterCrop').addEventListener('change', renderLots);
+      document.getElementById('filterGrade').addEventListener('change', renderLots);
+      document.getElementById('searchLocation').addEventListener('input', renderLots);
+
+      document.getElementById('resetFiltersBtn').addEventListener('click', () => {
+        document.getElementById('filterCrop').value = 'all';
+        document.getElementById('filterGrade').value = 'all';
+        document.getElementById('searchLocation').value = '';
+        renderLots();
+      });
+
+      document.getElementById('refreshLotsBtn').addEventListener('click', fetchActiveLots);
+
+      const modal = document.getElementById('farmerContactModal');
+      const closeModal = () => modal.classList.remove('active');
+      document.getElementById('closeContactModalBtn').addEventListener('click', closeModal);
+      document.getElementById('dismissContactBtn').addEventListener('click', closeModal);
+
+      document.getElementById('logoutBtn').addEventListener('click', async () => {
+        try {
+          await supabase.auth.signOut();
+        } catch (e) {}
+        localStorage.removeItem('farmos_user');
+        window.location.href = 'buyer-login.html';
+      });
+    }
+  </script>
+</body>
+</html>

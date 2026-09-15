@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Produce Lots — FarmOS</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="dash-page">
+  <!-- Top Navigation -->
+  <nav class="dash-navbar">
+    <div class="dash-nav-left">
+      <a href="../index.html" class="brand-logo-badge" style="color: #FFFFFF;">
+        <div class="leaf-icon">🌿</div>
+        <span>FarmOS</span>
+      </a>
+      <a href="farmer-dashboard.html" style="background: rgba(255, 255, 255, 0.15); padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: #FFFFFF; text-decoration: none;">
+        ← Dashboard
+      </a>
+      <a href="market-prices.html" style="background: rgba(244, 185, 66, 0.2); border: 1px solid rgba(244, 185, 66, 0.4); padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: var(--color-accent); text-decoration: none;">
+        📊 Live APMC Rates
+      </a>
+    </div>
+    <div class="dash-user-menu">
+      <span id="userNavDisplay" style="font-size: 0.9rem; font-weight: 600;">Farmer</span>
+      <button id="logoutBtn" class="dash-btn-logout">Sign Out</button>
+    </div>
+  </nav>
+
+  <main class="dash-main">
+    <!-- Page Header & Action -->
+    <div style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 20px; margin-bottom: 28px;">
+      <div>
+        <span style="color: var(--color-secondary); font-weight: 700; font-size: 0.85rem; letter-spacing: 0.06em; text-transform: uppercase;">
+          Farmer Inventory Management
+        </span>
+        <h1 style="font-size: 2.2rem; font-weight: 800; color: var(--color-text-dark); margin-top: 4px;">
+          My Produce Lots
+        </h1>
+        <p style="color: var(--color-text-muted); font-size: 1rem; max-width: 620px;">
+          Create and manage your agricultural harvest listings. Verified buyers across Maharashtra can view active lots and negotiate direct procurement.
+        </p>
+      </div>
+
+      <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <button id="openAddModalBtn" class="btn-primary-sm" style="padding: 12px 22px; font-size: 0.95rem;">
+          <span style="font-size: 1.1rem;">+</span> Add New Produce Lot
+        </button>
+        <a href="add-lot.html" class="btn-secondary-sm" style="padding: 12px 18px; font-size: 0.95rem;">
+          Full Form Page ↗
+        </a>
+      </div>
+    </div>
+
+    <!-- Summary Stats Strip -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 28px;">
+      <div style="background: #FFFFFF; border: 1px solid var(--color-border); border-radius: 12px; padding: 18px 20px;">
+        <div style="font-size: 0.8rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase;">Total Listed Lots</div>
+        <div id="statTotalLots" style="font-size: 1.8rem; font-weight: 800; color: var(--color-text-dark); margin-top: 4px;">0</div>
+      </div>
+      <div style="background: #FFFFFF; border: 1px solid var(--color-border); border-radius: 12px; padding: 18px 20px;">
+        <div style="font-size: 0.8rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase;">Active / Available</div>
+        <div id="statActiveLots" style="font-size: 1.8rem; font-weight: 800; color: var(--color-secondary); margin-top: 4px;">0</div>
+      </div>
+      <div style="background: #FFFFFF; border: 1px solid var(--color-border); border-radius: 12px; padding: 18px 20px;">
+        <div style="font-size: 0.8rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase;">Active Volume</div>
+        <div id="statTotalVolume" style="font-size: 1.8rem; font-weight: 800; color: var(--color-text-dark); margin-top: 4px;">0 qtl</div>
+      </div>
+      <div style="background: #FFFFFF; border: 1px solid var(--color-border); border-radius: 12px; padding: 18px 20px;">
+        <div style="font-size: 0.8rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase;">Est. Gross Value</div>
+        <div id="statTotalValue" style="font-size: 1.8rem; font-weight: 800; color: var(--color-primary); margin-top: 4px;">₹ 0</div>
+      </div>
+    </div>
+
+    <!-- Filter & Search Bar -->
+    <div class="filter-controls-bar">
+      <div class="filter-group">
+        <label class="filter-label" for="filterStatus">Status Filter</label>
+        <select id="filterStatus" class="filter-select">
+          <option value="all">All Statuses</option>
+          <option value="active" selected>Active Only</option>
+          <option value="sold">Sold</option>
+          <option value="expired">Expired</option>
+        </select>
+      </div>
+
+      <div class="filter-group" style="flex: 2 1 240px;">
+        <label class="filter-label" for="searchCrop">Search Crop / Location</label>
+        <input type="text" id="searchCrop" class="filter-input" placeholder="e.g. Tomato, Nashik, Grade A...">
+      </div>
+
+      <div style="display: flex; align-items: flex-end; padding-bottom: 2px;">
+        <button id="refreshBtn" class="btn-secondary-sm">
+          🔄 Refresh
+        </button>
+      </div>
+    </div>
+
+    <!-- Live Lots Grid Container -->
+    <div id="lotsLoadingState" style="text-align: center; padding: 60px 20px; background: #FFFFFF; border: 1px solid var(--color-border); border-radius: 14px;">
+      <div style="font-size: 2rem; margin-bottom: 12px;">⏳</div>
+      <div style="font-size: 1.1rem; font-weight: 700;">Loading your harvest listings...</div>
+      <div style="color: var(--color-text-muted); font-size: 0.9rem;">Connecting to Supabase live database</div>
+    </div>
+
+    <div id="lotsEmptyState" style="display: none; text-align: center; padding: 60px 20px; background: #FFFFFF; border: 2px dashed var(--color-border); border-radius: 14px;">
+      <div style="font-size: 3rem; margin-bottom: 16px;">🌱</div>
+      <h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 8px;">No produce lots listed yet</h3>
+      <p style="color: var(--color-text-muted); max-width: 460px; margin: 0 auto 24px;">
+        You haven't listed any farm produce lots yet. Add your current crops, expected prices, and available dates to attract buyers.
+      </p>
+      <button id="emptyAddBtn" class="btn-primary-sm" style="padding: 12px 24px;">
+        + List Your First Harvest
+      </button>
+    </div>
+
+    <div id="lotsGrid" class="lots-grid" style="display: none;"></div>
+  </main>
+
+  <!-- Add Lot Modal -->
+  <div id="addLotModal" class="farmos-modal-overlay">
+    <div class="farmos-modal-card">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+        <div>
+          <span style="color: var(--color-secondary); font-weight: 700; font-size: 0.8rem; text-transform: uppercase;">
+            New Listing
+          </span>
+          <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--color-text-dark);">
+            Add Produce Lot
+          </h2>
+        </div>
+        <button id="closeModalBtn" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--color-text-muted);">
+          ✕
+        </button>
+      </div>
+
+      <form id="addLotForm">
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <div>
+            <label class="filter-label" for="lotCropSelect" style="display: block; margin-bottom: 6px;">
+              Commodity / Crop *
+            </label>
+            <select id="lotCropSelect" class="filter-select" required>
+              <option value="">Select a crop...</option>
+            </select>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div>
+              <label class="filter-label" for="lotQuantity" style="display: block; margin-bottom: 6px;">
+                Quantity *
+              </label>
+              <input type="number" id="lotQuantity" class="filter-input" placeholder="e.g. 50" min="0.1" step="any" required>
+            </div>
+            <div>
+              <label class="filter-label" for="lotUnit" style="display: block; margin-bottom: 6px;">
+                Unit *
+              </label>
+              <select id="lotUnit" class="filter-select" required>
+                <option value="quintal" selected>quintal (100 kg)</option>
+                <option value="ton">ton (1000 kg)</option>
+                <option value="crate">crate</option>
+                <option value="kg">kg</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div>
+              <label class="filter-label" for="lotGrade" style="display: block; margin-bottom: 6px;">
+                Quality Grade *
+              </label>
+              <select id="lotGrade" class="filter-select" required>
+                <option value="Grade A+">Grade A+ (Export Premium)</option>
+                <option value="Grade A" selected>Grade A (Superior / Mandi Top)</option>
+                <option value="Grade B">Grade B (Standard Market)</option>
+                <option value="Grade C">Grade C (Processing / Bulk)</option>
+              </select>
+            </div>
+            <div>
+              <label class="filter-label" for="lotPrice" style="display: block; margin-bottom: 6px;">
+                Target Price (₹ per unit)
+              </label>
+              <input type="number" id="lotPrice" class="filter-input" placeholder="e.g. 2100" min="0" step="any">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div>
+              <label class="filter-label" for="lotAvailableFrom" style="display: block; margin-bottom: 6px;">
+                Available From *
+              </label>
+              <input type="date" id="lotAvailableFrom" class="filter-input" required>
+            </div>
+            <div>
+              <label class="filter-label" for="lotLocation" style="display: block; margin-bottom: 6px;">
+                Farm Location / Village
+              </label>
+              <input type="text" id="lotLocation" class="filter-input" placeholder="e.g. Lasalgaon, Nashik">
+            </div>
+          </div>
+
+          <div id="modalErrorBox" style="display: none; padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; background: var(--color-error-bg); color: var(--color-error); border: 1px solid var(--color-error-border);"></div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 12px;">
+            <button type="button" id="cancelModalBtn" class="btn-secondary-sm">
+              Cancel
+            </button>
+            <button type="submit" id="submitLotBtn" class="btn-primary-sm">
+              Publish Produce Lot
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module">
+    import { getSupabase } from '../js/supabaseClient.js';
+
+    let supabase;
+    let currentUser = null;
+    let farmerProfile = null;
+    let cachedCrops = [];
+    let allFarmerLots = [];
+
+    // Format currency
+    function formatINR(val) {
+      if (val === null || val === undefined || isNaN(val)) return '—';
+      return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val);
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        supabase = getSupabase();
+      } catch (err) {
+        console.error('Failed to init Supabase:', err);
+        alert('Supabase client error. Please check your network connection.');
+        return;
+      }
+
+      // Check session
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session || !session.user) {
+        // Fallback check cached user or redirect
+        const cached = localStorage.getItem('farmos_user');
+        if (!cached) {
+          window.location.href = 'farmer-login.html';
+          return;
+        }
+        currentUser = JSON.parse(cached);
+      } else {
+        currentUser = session.user;
+      }
+
+      // Load farmer profile
+      try {
+        const { data: profile } = await supabase
+          .from('farmers')
+          .select('*')
+          .eq('id', currentUser.id)
+          .single();
+        if (profile) {
+          farmerProfile = profile;
+          const displayName = profile.name || currentUser.user_metadata?.name || 'Farmer';
+          document.getElementById('userNavDisplay').textContent = displayName;
+          if (profile.village || profile.district) {
+            document.getElementById('lotLocation').value = [profile.village, profile.district, profile.state].filter(Boolean).join(', ');
+          }
+        }
+      } catch (e) {
+        console.warn('Profile fetch note:', e);
+      }
+
+      // Set default available date to today
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('lotAvailableFrom').value = today;
+
+      // Load crops list for dropdown
+      await loadCrops();
+
+      // Load farmer's lots
+      await loadFarmerLots();
+
+      // Setup UI listeners
+      setupEventHandlers();
+    });
+
+    async function loadCrops() {
+      try {
+        const { data, error } = await supabase
+          .from('crops')
+          .select('*')
+          .order('name');
+        
+        if (error) throw error;
+        cachedCrops = data || [];
+        
+        const select = document.getElementById('lotCropSelect');
+        select.innerHTML = '<option value="">Select a crop...</option>' + 
+          cachedCrops.map(c => `<option value="${c.id}" data-unit="${c.unit}">${c.name} (${c.category})</option>`).join('');
+
+        select.addEventListener('change', (e) => {
+          const opt = select.options[select.selectedIndex];
+          const unit = opt.getAttribute('data-unit');
+          if (unit) {
+            const unitSelect = document.getElementById('lotUnit');
+            for (let i = 0; i < unitSelect.options.length; i++) {
+              if (unitSelect.options[i].value === unit) {
+                unitSelect.selectedIndex = i;
+                break;
+              }
+            }
+          }
+        });
+      } catch (err) {
+        console.error('Error loading crops:', err);
+      }
+    }
+
+    async function loadFarmerLots() {
+      const loadingState = document.getElementById('lotsLoadingState');
+      const emptyState = document.getElementById('lotsEmptyState');
+      const grid = document.getElementById('lotsGrid');
+
+      loadingState.style.display = 'block';
+      emptyState.style.display = 'none';
+      grid.style.display = 'none';
+
+      try {
+        const { data, error } = await supabase
+          .from('lots')
+          .select('*, crops(name, category, unit)')
+          .eq('farmer_id', currentUser.id)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        allFarmerLots = data || [];
+
+        renderLots();
+        updateSummaryStats();
+      } catch (err) {
+        console.error('Error fetching farmer lots:', err);
+        loadingState.innerHTML = `
+          <div style="color: var(--color-error); font-weight: 700; font-size: 1.1rem; margin-bottom: 8px;">Failed to load lots</div>
+          <p style="color: var(--color-text-muted); font-size: 0.9rem;">${err.message}</p>
+          <button id="retryLotsBtn" class="btn-secondary-sm" style="margin-top: 14px;">Try Again</button>
+        `;
+        document.getElementById('retryLotsBtn')?.addEventListener('click', loadFarmerLots);
+      }
+    }
+
+    function updateSummaryStats() {
+      const total = allFarmerLots.length;
+      const activeLots = allFarmerLots.filter(l => l.status === 'active');
+      const activeCount = activeLots.length;
+      
+      const totalVolume = activeLots.reduce((sum, l) => sum + (Number(l.quantity) || 0), 0);
+      const totalVal = activeLots.reduce((sum, l) => {
+        const p = Number(l.price_expectation) || 0;
+        const q = Number(l.quantity) || 0;
+        return sum + (p * q);
+      }, 0);
+
+      document.getElementById('statTotalLots').textContent = total;
+      document.getElementById('statActiveLots').textContent = activeCount;
+      document.getElementById('statTotalVolume').textContent = `${totalVolume.toLocaleString('en-IN')} qtl`;
+      document.getElementById('statTotalValue').textContent = formatINR(totalVal);
+    }
+
+    function renderLots() {
+      const loadingState = document.getElementById('lotsLoadingState');
+      const emptyState = document.getElementById('lotsEmptyState');
+      const grid = document.getElementById('lotsGrid');
+
+      loadingState.style.display = 'none';
+
+      const statusFilter = document.getElementById('filterStatus').value;
+      const searchQuery = document.getElementById('searchCrop').value.toLowerCase().trim();
+
+      const filtered = allFarmerLots.filter(lot => {
+        if (statusFilter !== 'all' && lot.status !== statusFilter) return false;
+        if (searchQuery) {
+          const cropName = (lot.crops?.name || '').toLowerCase();
+          const location = (lot.location || '').toLowerCase();
+          const grade = (lot.grade || '').toLowerCase();
+          if (!cropName.includes(searchQuery) && !location.includes(searchQuery) && !grade.includes(searchQuery)) {
+            return false;
+          }
+        }
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        if (allFarmerLots.length === 0) {
+          emptyState.style.display = 'block';
+          grid.style.display = 'none';
+        } else {
+          grid.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 40px; background: #FFFFFF; border-radius: 12px; border: 1px solid var(--color-border);">
+              <p style="color: var(--color-text-muted); font-size: 1rem;">No produce lots match your search filters.</p>
+              <button id="resetFilterBtn" class="btn-secondary-sm" style="margin-top: 10px;">Reset Filters</button>
+            </div>
+          `;
+          grid.style.display = 'grid';
+          document.getElementById('resetFilterBtn')?.addEventListener('click', () => {
+            document.getElementById('filterStatus').value = 'all';
+            document.getElementById('searchCrop').value = '';
+            renderLots();
+          });
+        }
+        return;
+      }
+
+      emptyState.style.display = 'none';
+      grid.style.display = 'grid';
+
+      grid.innerHTML = filtered.map(lot => {
+        const cropName = lot.crops?.name || 'Produce';
+        const cropCat = lot.crops?.category || 'Crops';
+        const unit = lot.unit || lot.crops?.unit || 'quintal';
+        const statusClass = `badge-status-${lot.status}`;
+        const totalEstVal = (lot.price_expectation && lot.quantity) ? formatINR(lot.price_expectation * lot.quantity) : '—';
+        const availDate = lot.available_from ? new Date(lot.available_from).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Immediate';
+
+        return `
+          <div class="lot-card" data-lot-id="${lot.id}">
+            <div>
+              <div class="lot-card-header">
+                <div>
+                  <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--color-secondary); font-weight: 700; letter-spacing: 0.05em;">
+                    ${cropCat}
+                  </span>
+                  <div class="lot-crop-name">${cropName}</div>
+                </div>
+                <span class="badge-pill ${statusClass}">
+                  ${lot.status.toUpperCase()}
+                </span>
+              </div>
+
+              <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;">
+                <span class="badge-pill badge-grade">${lot.grade || 'Standard Grade'}</span>
+                <span class="badge-pill" style="background: #F3F4F6; color: var(--color-text-dark);">
+                  ${lot.location || 'Maharashtra'}
+                </span>
+              </div>
+
+              <div class="lot-meta-grid">
+                <div class="lot-meta-item">
+                  <span class="lot-meta-label">Quantity</span>
+                  <span class="lot-meta-val">${Number(lot.quantity).toLocaleString('en-IN')} ${unit}</span>
+                </div>
+                <div class="lot-meta-item">
+                  <span class="lot-meta-label">Target Rate</span>
+                  <span class="lot-meta-val">${lot.price_expectation ? '₹ ' + Number(lot.price_expectation).toLocaleString('en-IN') + '/' + unit : 'Open Offer'}</span>
+                </div>
+                <div class="lot-meta-item">
+                  <span class="lot-meta-label">Est. Lot Value</span>
+                  <span class="lot-meta-val" style="color: var(--color-primary);">${totalEstVal}</span>
+                </div>
+                <div class="lot-meta-item">
+                  <span class="lot-meta-label">Available From</span>
+                  <span class="lot-meta-val">${availDate}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="lot-footer-actions">
+              ${lot.status === 'active' ? `
+                <button class="btn-secondary-sm mark-sold-btn" data-id="${lot.id}" style="font-size: 0.8rem; padding: 6px 12px;">
+                  Mark Sold
+                </button>
+              ` : `
+                <span style="font-size: 0.8rem; color: var(--color-text-muted); font-style: italic;">
+                  Archived Listing
+                </span>
+              `}
+              <button class="delete-lot-btn" data-id="${lot.id}" style="background: none; border: none; color: #DC2626; cursor: pointer; font-size: 0.82rem; font-weight: 600; padding: 6px 8px; border-radius: 6px;">
+                Delete 🗑
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Attach row action listeners
+      grid.querySelectorAll('.mark-sold-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const lotId = btn.getAttribute('data-id');
+          if (!confirm('Mark this lot as SOLD? It will no longer appear to buyers in the public marketplace.')) return;
+          try {
+            const { error } = await supabase
+              .from('lots')
+              .update({ status: 'sold' })
+              .eq('id', lotId);
+            if (error) throw error;
+            await loadFarmerLots();
+          } catch (e) {
+            alert('Failed to update lot: ' + e.message);
+          }
+        });
+      });
+
+      grid.querySelectorAll('.delete-lot-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const lotId = btn.getAttribute('data-id');
+          if (!confirm('Are you sure you want to permanently delete this lot?')) return;
+          try {
+            const { error } = await supabase
+              .from('lots')
+              .delete()
+              .eq('id', lotId);
+            if (error) throw error;
+            await loadFarmerLots();
+          } catch (e) {
+            alert('Failed to delete lot: ' + e.message);
+          }
+        });
+      });
+    }
+
+    function setupEventHandlers() {
+      // Filters
+      document.getElementById('filterStatus').addEventListener('change', renderLots);
+      document.getElementById('searchCrop').addEventListener('input', renderLots);
+      document.getElementById('refreshBtn').addEventListener('click', loadFarmerLots);
+
+      // Modal controls
+      const modal = document.getElementById('addLotModal');
+      const openModal = () => {
+        document.getElementById('modalErrorBox').style.display = 'none';
+        modal.classList.add('active');
+      };
+      const closeModal = () => modal.classList.remove('active');
+
+      document.getElementById('openAddModalBtn').addEventListener('click', openModal);
+      document.getElementById('emptyAddBtn')?.addEventListener('click', openModal);
+      document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+      document.getElementById('cancelModalBtn').addEventListener('click', closeModal);
+
+      // Check URL query param ?action=new
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('action') === 'new') {
+        openModal();
+      }
+
+      // Add Lot Form Submission
+      const form = document.getElementById('addLotForm');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const errorBox = document.getElementById('modalErrorBox');
+        const submitBtn = document.getElementById('submitLotBtn');
+        errorBox.style.display = 'none';
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Publishing...';
+
+        try {
+          const cropId = document.getElementById('lotCropSelect').value;
+          const quantity = parseFloat(document.getElementById('lotQuantity').value);
+          const unit = document.getElementById('lotUnit').value;
+          const grade = document.getElementById('lotGrade').value;
+          const priceRaw = document.getElementById('lotPrice').value;
+          const priceExpectation = priceRaw ? parseFloat(priceRaw) : null;
+          const availableFrom = document.getElementById('lotAvailableFrom').value;
+          const location = document.getElementById('lotLocation').value.trim();
+
+          if (!cropId) throw new Error('Please select a crop commodity.');
+          if (!quantity || quantity <= 0) throw new Error('Quantity must be greater than 0.');
+
+          const payload = {
+            farmer_id: currentUser.id,
+            crop_id: cropId,
+            quantity: quantity,
+            unit: unit,
+            grade: grade,
+            price_expectation: priceExpectation,
+            available_from: availableFrom,
+            status: 'active',
+            location: location || (farmerProfile?.district ? `${farmerProfile.district}, Maharashtra` : 'Maharashtra')
+          };
+
+          const { error } = await supabase.from('lots').insert([payload]);
+          if (error) throw error;
+
+          // Success
+          closeModal();
+          form.reset();
+          document.getElementById('lotAvailableFrom').value = new Date().toISOString().split('T')[0];
+          await loadFarmerLots();
+        } catch (err) {
+          console.error('Failed to create lot:', err);
+          errorBox.textContent = err.message || 'Failed to publish produce lot.';
+          errorBox.style.display = 'block';
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Publish Produce Lot';
+        }
+      });
+
+      // Logout handler
+      document.getElementById('logoutBtn').addEventListener('click', async () => {
+        try {
+          await supabase.auth.signOut();
+        } catch (err) {}
+        localStorage.removeItem('farmos_user');
+        window.location.href = 'farmer-login.html';
+      });
+    }
+  </script>
+</body>
+</html>

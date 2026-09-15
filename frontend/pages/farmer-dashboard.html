@@ -56,39 +56,75 @@
       </div>
     </div>
 
-    <!-- Phase 2+ placeholders -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-      <div style="background: #FFFFFF; border: 1px dashed var(--color-border); border-radius: 12px; padding: 24px;">
-        <div style="font-size: 1.5rem; margin-bottom: 8px;">📦</div>
-        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 6px;">Produce Lot Management</h3>
-        <p style="color: var(--color-text-muted); font-size: 0.875rem; margin-bottom: 16px;">
-          Create new harvest listings with grade, variety, moisture, and target price.
-        </p>
-        <span style="font-size: 0.8rem; font-weight: 700; color: #B45309; background: #FEF7EA; padding: 4px 8px; border-radius: 4px;">
-          Phase 2 Deliverable
-        </span>
+    <!-- Live Feature Modules -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+      <!-- Produce Lot Management -->
+      <div class="dash-card-interactive">
+        <div>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <div style="font-size: 1.8rem;">📦</div>
+            <span class="badge-pill badge-live">● Live Module</span>
+          </div>
+          <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--color-text-dark); margin-bottom: 6px;">
+            Produce Lot Management
+          </h3>
+          <p style="color: var(--color-text-muted); font-size: 0.875rem; margin-bottom: 16px;">
+            Create and maintain your harvest listings with standardized crop grading, quantity, and target price discovery.
+          </p>
+          <div style="background: var(--color-bg); padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: var(--color-text-muted); font-weight: 600;">Your Active Lots:</span>
+            <strong id="dashActiveLotsCount" style="color: var(--color-secondary); font-size: 1.05rem;">—</strong>
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <a href="my-lots.html" class="btn-primary-sm" style="flex: 1; justify-content: center; text-decoration: none;">
+            Manage My Lots →
+          </a>
+          <a href="add-lot.html" class="btn-secondary-sm" style="text-decoration: none;">
+            + Add Lot
+          </a>
+        </div>
       </div>
 
-      <div style="background: #FFFFFF; border: 1px dashed var(--color-border); border-radius: 12px; padding: 24px;">
-        <div style="font-size: 1.5rem; margin-bottom: 8px;">📊</div>
-        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 6px;">Live APMC Mandi Rates</h3>
-        <p style="color: var(--color-text-muted); font-size: 0.875rem; margin-bottom: 16px;">
-          Direct feed from data.gov.in Agmarknet with modal prices across Maharashtra.
-        </p>
-        <span style="font-size: 0.8rem; font-weight: 700; color: #B45309; background: #FEF7EA; padding: 4px 8px; border-radius: 4px;">
-          Phase 3 Deliverable
-        </span>
+      <!-- Live APMC Mandi Rates -->
+      <div class="dash-card-interactive">
+        <div>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <div style="font-size: 1.8rem;">📊</div>
+            <span class="badge-pill badge-live">● Live Feed</span>
+          </div>
+          <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--color-text-dark); margin-bottom: 6px;">
+            Live APMC Mandi Rates
+          </h3>
+          <p style="color: var(--color-text-muted); font-size: 0.875rem; margin-bottom: 16px;">
+            Real-time daily modal prices and arrival spreads across APMC mandis in Maharashtra with 30-day trend analytics.
+          </p>
+          <div style="background: var(--color-bg); padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: var(--color-text-muted); font-weight: 600;">Data Source:</span>
+            <span style="color: var(--color-primary); font-weight: 700;">Agmarknet API</span>
+          </div>
+        </div>
+        <div>
+          <a href="market-prices.html" class="btn-primary-sm" style="width: 100%; justify-content: center; text-decoration: none; box-sizing: border-box;">
+            View Live Mandi Rates →
+          </a>
+        </div>
       </div>
 
-      <div style="background: #FFFFFF; border: 1px dashed var(--color-border); border-radius: 12px; padding: 24px;">
-        <div style="font-size: 1.5rem; margin-bottom: 8px;">🤝</div>
-        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 6px;">Buyer Matchmaking</h3>
-        <p style="color: var(--color-text-muted); font-size: 0.875rem; margin-bottom: 16px;">
-          Direct buyer trade offers and automated net price realization scoring.
-        </p>
-        <span style="font-size: 0.8rem; font-weight: 700; color: #B45309; background: #FEF7EA; padding: 4px 8px; border-radius: 4px;">
-          Phase 4 & 5 Deliverable
-        </span>
+      <!-- Buyer Matchmaking (Phase 4/5) -->
+      <div style="background: #FFFFFF; border: 1px dashed var(--color-border); border-radius: 14px; padding: 24px; display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="font-size: 1.8rem; margin-bottom: 12px;">🤝</div>
+          <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 6px;">Buyer Matchmaking</h3>
+          <p style="color: var(--color-text-muted); font-size: 0.875rem; margin-bottom: 16px;">
+            Direct buyer procurement requirements and automated net price realization scoring algorithm.
+          </p>
+        </div>
+        <div>
+          <span style="font-size: 0.8rem; font-weight: 700; color: #B45309; background: #FEF7EA; padding: 4px 10px; border-radius: 6px; display: inline-block;">
+            Phase 4 & 5 Upcoming
+          </span>
+        </div>
       </div>
     </div>
   </main>
@@ -141,6 +177,23 @@
         document.getElementById('profilePhone').textContent = userData.phone || '—';
         const loc = [userData.village, userData.district, userData.state].filter(Boolean).join(', ') || '—';
         document.getElementById('profileLocation').textContent = loc;
+
+        // Fetch active lots count for farmer
+        try {
+          const client = getSupabase();
+          const { count, error } = await client
+            .from('lots')
+            .select('*', { count: 'exact', head: true })
+            .eq('farmer_id', userData.id)
+            .eq('status', 'active');
+          if (!error && count !== null) {
+            document.getElementById('dashActiveLotsCount').textContent = `${count} Active`;
+          } else {
+            document.getElementById('dashActiveLotsCount').textContent = '0 Active';
+          }
+        } catch (err) {
+          document.getElementById('dashActiveLotsCount').textContent = '0 Active';
+        }
       }
 
       // Logout handler

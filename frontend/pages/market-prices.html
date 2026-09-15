@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live APMC Mandi Rates — FarmOS</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body class="dash-page">
+  <!-- Dynamic Navbar -->
+  <nav class="dash-navbar" id="marketNav">
+    <div class="dash-nav-left">
+      <a href="../index.html" class="brand-logo-badge" style="color: #FFFFFF;">
+        <div class="leaf-icon">🌿</div>
+        <span>FarmOS</span>
+      </a>
+      <a id="backPortalBtn" href="farmer-dashboard.html" style="background: rgba(255, 255, 255, 0.15); padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: #FFFFFF; text-decoration: none;">
+        ← Back to Portal
+      </a>
+    </div>
+    <div class="dash-user-menu">
+      <span id="userStatusDisplay" style="font-size: 0.85rem; font-weight: 600; background: rgba(255, 255, 255, 0.1); padding: 4px 10px; border-radius: 6px;">
+        Market Intelligence
+      </span>
+      <button id="authActionBtn" class="dash-btn-logout" style="display: none;">Sign Out</button>
+    </div>
+  </nav>
+
+  <main class="dash-main" style="max-width: 1120px;">
+    <!-- Page Header -->
+    <div style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 20px; margin-bottom: 28px;">
+      <div>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+          <span style="color: var(--color-secondary); font-weight: 700; font-size: 0.85rem; letter-spacing: 0.06em; text-transform: uppercase;">
+            APMC Price Discovery Network
+          </span>
+          <span class="badge-pill badge-live">● Live Agmarknet Feed</span>
+        </div>
+        <h1 style="font-size: 2.2rem; font-weight: 800; color: var(--color-text-dark);">
+          Live APMC Mandi Rates
+        </h1>
+        <p style="color: var(--color-text-muted); font-size: 1rem; max-width: 680px;">
+          Direct daily arrival prices from Agricultural Produce Market Committees (APMCs) across Maharashtra. Track price variations, modal averages, and 30-day temporal price trends.
+        </p>
+      </div>
+
+      <div style="display: flex; gap: 10px;">
+        <button id="refreshDataBtn" class="btn-primary-sm" style="padding: 10px 18px;">
+          🔄 Refresh Rates
+        </button>
+      </div>
+    </div>
+
+    <!-- Summary Metrics Strip -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 28px;">
+      <div style="background: #FFFFFF; border: 1px solid var(--color-border); border-radius: 12px; padding: 18px 20px;">
+        <div style="font-size: 0.78rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase;">Selected Commodity Avg</div>
+        <div id="statAvgModal" style="font-size: 1.8rem; font-weight: 800; color: var(--color-primary); margin-top: 4px;">—</div>
+        <div id="statCommoditySub" style="font-size: 0.78rem; color: var(--color-secondary); font-weight: 600; margin-top: 2px;">Onion (Maharashtra)</div>
+      </div>
+      <div style="background: #FFFFFF; border: 1px solid var(--color-border); border-radius: 12px; padding: 18px 20px;">
+        <div style="font-size: 0.78rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase;">30-Day Peak High</div>
+        <div id="statPeakRate" style="font-size: 1.8rem; font-weight: 800; color: #15803D; margin-top: 4px;">—</div>
+        <div style="font-size: 0.78rem; color: var(--color-text-muted); margin-top: 2px;">Highest mandi arrival rate</div>
+      </div>
+      <div style="background: #FFFFFF; border: 1px solid var(--color-border); border-radius: 12px; padding: 18px 20px;">
+        <div style="font-size: 0.78rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase;">30-Day Floor Low</div>
+        <div id="statFloorRate" style="font-size: 1.8rem; font-weight: 800; color: #B45309; margin-top: 4px;">—</div>
+        <div style="font-size: 0.78rem; color: var(--color-text-muted); margin-top: 2px;">Lowest recorded mandi arrival</div>
+      </div>
+      <div style="background: #FFFFFF; border: 1px solid var(--color-border); border-radius: 12px; padding: 18px 20px;">
+        <div style="font-size: 0.78rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase;">Reporting Mandis</div>
+        <div id="statMandiCount" style="font-size: 1.8rem; font-weight: 800; color: var(--color-text-dark); margin-top: 4px;">—</div>
+        <div style="font-size: 0.78rem; color: var(--color-text-muted); margin-top: 2px;">Active APMC markets</div>
+      </div>
+    </div>
+
+    <!-- Chart.js 30-Day Trend Chart Card -->
+    <div style="background: #FFFFFF; border: 1px solid var(--color-border); border-radius: 16px; padding: 26px; margin-bottom: 28px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
+        <div>
+          <span style="color: var(--color-secondary); font-weight: 700; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em;">
+            Price History & Trend Analysis
+          </span>
+          <h2 id="chartTitle" style="font-size: 1.35rem; font-weight: 800; color: var(--color-text-dark); margin-top: 2px;">
+            30-Day Modal Price Trend (₹ / Quintal)
+          </h2>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <label for="chartMarketFilter" style="font-size: 0.8rem; font-weight: 700; color: var(--color-text-muted);">Mandi:</label>
+          <select id="chartMarketFilter" class="filter-select" style="width: auto; padding: 6px 12px; font-size: 0.85rem;">
+            <option value="all">All Markets Average</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="position: relative; height: 320px; width: 100%;">
+        <canvas id="priceTrendCanvas"></canvas>
+      </div>
+    </div>
+
+    <!-- Filter & Search Controls Bar -->
+    <div class="filter-controls-bar">
+      <div class="filter-group">
+        <label class="filter-label" for="filterCommodity">Commodity</label>
+        <select id="filterCommodity" class="filter-select">
+          <option value="all">All Commodities</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label" for="filterState">State</label>
+        <select id="filterState" class="filter-select">
+          <option value="all">All States</option>
+          <option value="Maharashtra" selected>Maharashtra</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label" for="filterDistrict">District</label>
+        <select id="filterDistrict" class="filter-select">
+          <option value="all">All Districts</option>
+        </select>
+      </div>
+
+      <div class="filter-group" style="flex: 2 1 200px;">
+        <label class="filter-label" for="searchMandi">Search Mandi / APMC</label>
+        <input type="text" id="searchMandi" class="filter-input" placeholder="e.g. Lasalgaon, Pune, Nagpur...">
+      </div>
+
+      <div style="display: flex; align-items: flex-end; padding-bottom: 2px;">
+        <button id="resetTableFiltersBtn" class="btn-secondary-sm">
+          Reset
+        </button>
+      </div>
+    </div>
+
+    <!-- Price Table Container -->
+    <div class="price-table-wrapper">
+      <div style="padding: 16px 20px; border-bottom: 1px solid var(--color-border); display: flex; align-items: center; justify-content: space-between;">
+        <div style="font-weight: 700; font-size: 0.95rem; color: var(--color-text-dark);">
+          APMC Daily Arrival Rates (<span id="tableRowsCount">0</span> records)
+        </div>
+        <div style="font-size: 0.8rem; color: var(--color-text-muted);">
+          All rates in INR (₹) per Quintal (100 kg)
+        </div>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table class="mandi-price-table">
+          <thead>
+            <tr>
+              <th>Commodity</th>
+              <th>State</th>
+              <th>District</th>
+              <th>Mandi / Market</th>
+              <th style="text-align: right;">Min Price</th>
+              <th style="text-align: right;">Max Price</th>
+              <th style="text-align: right;">Modal Price</th>
+              <th>Price Date</th>
+            </tr>
+          </thead>
+          <tbody id="priceTableBody">
+            <tr>
+              <td colspan="8" style="text-align: center; padding: 40px; color: var(--color-text-muted);">
+                Loading live market prices...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { getSupabase } from '../js/supabaseClient.js';
+
+    let supabase;
+    let allPrices = [];
+    let trendChart = null;
+
+    function formatINR(val) {
+      if (val === null || val === undefined || isNaN(val)) return '—';
+      return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val);
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        supabase = getSupabase();
+      } catch (err) {
+        console.error('Supabase initialization error:', err);
+      }
+
+      setupPortalNavigation();
+      await fetchMarketPrices();
+      setupEventListeners();
+    });
+
+    function setupPortalNavigation() {
+      const cached = localStorage.getItem('farmos_user');
+      const backBtn = document.getElementById('backPortalBtn');
+      const authBtn = document.getElementById('authActionBtn');
+      const navEl = document.getElementById('marketNav');
+
+      if (cached) {
+        try {
+          const user = JSON.parse(cached);
+          const isBuyer = user.company_name || user.buyer_type;
+          if (isBuyer) {
+            backBtn.href = 'buyer-dashboard.html';
+            backBtn.textContent = '← Buyer Portal';
+            navEl.style.backgroundColor = '#163628';
+          } else {
+            backBtn.href = 'farmer-dashboard.html';
+            backBtn.textContent = '← Farmer Portal';
+          }
+          authBtn.style.display = 'inline-block';
+          authBtn.addEventListener('click', async () => {
+            try { await supabase?.auth.signOut(); } catch (e) {}
+            localStorage.removeItem('farmos_user');
+            window.location.href = isBuyer ? 'buyer-login.html' : 'farmer-login.html';
+          });
+        } catch (e) {}
+      } else {
+        backBtn.href = '../index.html';
+        backBtn.textContent = '← FarmOS Home';
+      }
+    }
+
+    async function fetchMarketPrices() {
+      const tbody = document.getElementById('priceTableBody');
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="8" style="text-align: center; padding: 40px; color: var(--color-text-muted);">
+            Connecting to Supabase and loading APMC price records...
+          </td>
+        </tr>
+      `;
+
+      try {
+        const { data, error } = await supabase
+          .from('market_prices')
+          .select('*')
+          .order('price_date', { ascending: false });
+
+        if (error) throw error;
+        allPrices = data || [];
+
+        populateFilterDropdowns();
+        renderTable();
+        updateTrendChart();
+      } catch (err) {
+        console.error('Failed to load market prices:', err);
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" style="text-align: center; padding: 40px; color: var(--color-error);">
+              Error loading prices: ${err.message}. Please verify Supabase market_prices table.
+            </td>
+          </tr>
+        `;
+      }
+    }
+
+    function populateFilterDropdowns() {
+      const commodities = Array.from(new Set(allPrices.map(p => p.commodity))).sort();
+      const districts = Array.from(new Set(allPrices.map(p => p.district))).sort();
+      const markets = Array.from(new Set(allPrices.map(p => p.market))).sort();
+
+      const commSelect = document.getElementById('filterCommodity');
+      commSelect.innerHTML = '<option value="all">All Commodities</option>' +
+        commodities.map(c => `<option value="${c}">${c}</option>`).join('');
+      
+      // Default to Onion if present, else first
+      if (commodities.includes('Onion')) {
+        commSelect.value = 'Onion';
+      } else if (commodities.length > 0) {
+        commSelect.value = commodities[0];
+      }
+
+      const distSelect = document.getElementById('filterDistrict');
+      distSelect.innerHTML = '<option value="all">All Districts</option>' +
+        districts.map(d => `<option value="${d}">${d}</option>`).join('');
+
+      const chartMarketSelect = document.getElementById('chartMarketFilter');
+      chartMarketSelect.innerHTML = '<option value="all">All Markets Average</option>' +
+        markets.map(m => `<option value="${m}">${m}</option>`).join('');
+    }
+
+    function getFilteredPrices() {
+      const selectedCommodity = document.getElementById('filterCommodity').value;
+      const selectedState = document.getElementById('filterState').value;
+      const selectedDistrict = document.getElementById('filterDistrict').value;
+      const search = document.getElementById('searchMandi').value.toLowerCase().trim();
+
+      return allPrices.filter(p => {
+        if (selectedCommodity !== 'all' && p.commodity !== selectedCommodity) return false;
+        if (selectedState !== 'all' && p.state !== selectedState) return false;
+        if (selectedDistrict !== 'all' && p.district !== selectedDistrict) return false;
+        if (search) {
+          const m = (p.market || '').toLowerCase();
+          const d = (p.district || '').toLowerCase();
+          if (!m.includes(search) && !d.includes(search)) return false;
+        }
+        return true;
+      });
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('priceTableBody');
+      const filtered = getFilteredPrices();
+      document.getElementById('tableRowsCount').textContent = filtered.length;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" style="text-align: center; padding: 40px; color: var(--color-text-muted);">
+              No mandi price records found matching current filters.
+            </td>
+          </tr>
+        `;
+        updateMetrics([]);
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(row => {
+        const pDate = row.price_date ? new Date(row.price_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+        return `
+          <tr>
+            <td><strong>${row.commodity}</strong></td>
+            <td>${row.state}</td>
+            <td>${row.district}</td>
+            <td>${row.market}</td>
+            <td style="text-align: right; color: var(--color-text-muted); font-weight: 600;">₹ ${row.min_price != null ? Number(row.min_price).toLocaleString('en-IN') : '—'}</td>
+            <td style="text-align: right; color: var(--color-text-muted); font-weight: 600;">₹ ${row.max_price != null ? Number(row.max_price).toLocaleString('en-IN') : '—'}</td>
+            <td style="text-align: right;">
+              <span class="price-modal-pill">₹ ${Number(row.modal_price).toLocaleString('en-IN')}</span>
+            </td>
+            <td>${pDate}</td>
+          </tr>
+        `;
+      }).join('');
+
+      updateMetrics(filtered);
+    }
+
+    function updateMetrics(records) {
+      const selectedCommodity = document.getElementById('filterCommodity').value;
+      document.getElementById('statCommoditySub').textContent = `${selectedCommodity === 'all' ? 'All Commodities' : selectedCommodity} (Maharashtra)`;
+
+      if (!records || records.length === 0) {
+        document.getElementById('statAvgModal').textContent = '—';
+        document.getElementById('statPeakRate').textContent = '—';
+        document.getElementById('statFloorRate').textContent = '—';
+        document.getElementById('statMandiCount').textContent = '0';
+        return;
+      }
+
+      const modals = records.map(r => Number(r.modal_price)).filter(p => !isNaN(p));
+      const highs = records.map(r => Number(r.max_price || r.modal_price)).filter(p => !isNaN(p));
+      const lows = records.map(r => Number(r.min_price || r.modal_price)).filter(p => !isNaN(p));
+      const uniqueMandis = new Set(records.map(r => r.market)).size;
+
+      const avgModal = modals.length > 0 ? modals.reduce((a, b) => a + b, 0) / modals.length : 0;
+      const peak = highs.length > 0 ? Math.max(...highs) : 0;
+      const floor = lows.length > 0 ? Math.min(...lows) : 0;
+
+      document.getElementById('statAvgModal').textContent = formatINR(avgModal);
+      document.getElementById('statPeakRate').textContent = formatINR(peak);
+      document.getElementById('statFloorRate').textContent = formatINR(floor);
+      document.getElementById('statMandiCount').textContent = uniqueMandis;
+    }
+
+    function updateTrendChart() {
+      const selectedCommodity = document.getElementById('filterCommodity').value;
+      const chartMarket = document.getElementById('chartMarketFilter').value;
+      const chartTitleEl = document.getElementById('chartTitle');
+
+      const targetCommodity = selectedCommodity === 'all' ? (allPrices[0]?.commodity || 'Onion') : selectedCommodity;
+      chartTitleEl.textContent = `30-Day Modal Rate Trend: ${targetCommodity} (₹ / Quintal)`;
+
+      // Filter prices for the chart commodity
+      let chartRows = allPrices.filter(p => p.commodity === targetCommodity);
+      if (chartMarket !== 'all') {
+        chartRows = chartRows.filter(p => p.market === chartMarket);
+      }
+
+      // Group by date, compute average modal price for that day
+      const dateMap = {};
+      chartRows.forEach(r => {
+        if (!r.price_date) return;
+        if (!dateMap[r.price_date]) {
+          dateMap[r.price_date] = [];
+        }
+        dateMap[r.price_date].push(Number(r.modal_price));
+      });
+
+      // Sort chronological
+      const sortedDates = Object.keys(dateMap).sort();
+      const labels = sortedDates.map(d => {
+        const parts = d.split('-');
+        return `${parts[2]}/${parts[1]}`;
+      });
+      const dataPoints = sortedDates.map(d => {
+        const arr = dateMap[d];
+        const avg = arr.reduce((a, b) => a + b, 0) / arr.length;
+        return Math.round(avg);
+      });
+
+      const ctx = document.getElementById('priceTrendCanvas').getContext('2d');
+      if (trendChart) {
+        trendChart.destroy();
+      }
+
+      trendChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: `${targetCommodity} Modal Price (₹/qtl)`,
+            data: dataPoints,
+            borderColor: '#1B4332',
+            backgroundColor: 'rgba(64, 145, 108, 0.12)',
+            fill: true,
+            tension: 0.35,
+            borderWidth: 2.5,
+            pointBackgroundColor: '#F4B942',
+            pointBorderColor: '#1B4332',
+            pointBorderWidth: 2,
+            pointRadius: 4,
+            pointHoverRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top',
+              labels: {
+                font: { family: "'Plus Jakarta Sans', sans-serif", weight: '600' },
+                color: '#374151'
+              }
+            },
+            tooltip: {
+              backgroundColor: '#1B4332',
+              titleFont: { family: "'Plus Jakarta Sans', sans-serif", weight: '700' },
+              bodyFont: { family: "'Plus Jakarta Sans', sans-serif" },
+              padding: 12,
+              callbacks: {
+                label: (ctx) => ` Modal Price: ₹ ${ctx.parsed.y.toLocaleString('en-IN')} / quintal`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: '#F3F4F6' },
+              ticks: { font: { family: "'Plus Jakarta Sans', sans-serif", size: 11 } }
+            },
+            y: {
+              grid: { color: '#E5E7EB' },
+              ticks: {
+                font: { family: "'Plus Jakarta Sans', sans-serif", size: 11 },
+                callback: (val) => `₹ ${val.toLocaleString('en-IN')}`
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function setupEventListeners() {
+      document.getElementById('filterCommodity').addEventListener('change', () => {
+        renderTable();
+        updateTrendChart();
+      });
+
+      document.getElementById('filterState').addEventListener('change', renderTable);
+      document.getElementById('filterDistrict').addEventListener('change', renderTable);
+      document.getElementById('searchMandi').addEventListener('input', renderTable);
+      document.getElementById('chartMarketFilter').addEventListener('change', updateTrendChart);
+
+      document.getElementById('resetTableFiltersBtn').addEventListener('click', () => {
+        document.getElementById('filterCommodity').value = 'all';
+        document.getElementById('filterState').value = 'all';
+        document.getElementById('filterDistrict').value = 'all';
+        document.getElementById('searchMandi').value = '';
+        renderTable();
+        updateTrendChart();
+      });
+
+      document.getElementById('refreshDataBtn').addEventListener('click', fetchMarketPrices);
+    }
+  </script>
+</body>
+</html>

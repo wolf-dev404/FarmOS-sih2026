@@ -18,7 +18,7 @@
 ## [1.5.0](https://github.com/supabase/agent-skills/compare/supabase-postgres-best-practices-v1.4.0...supabase-postgres-best-practices-v1.5.0) (2026-07-30)
 
 
-### Features
+### Features 
 
 * add schema-constraints reference for safe migration patterns ([#30](https://github.com/supabase/agent-skills/issues/30)) ([9b236f3](https://github.com/supabase/agent-skills/commit/9b236f3ebd65d76a2c570f19931353da9c858d5a))
 * using Supabase agent skills ([#12](https://github.com/supabase/agent-skills/issues/12)) ([7c2e389](https://github.com/supabase/agent-skills/commit/7c2e3894fddfde8eb6c77d2a8921904543b9be7a))

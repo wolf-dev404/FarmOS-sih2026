@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Produce Lot — FarmOS</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="dash-page">
+  <nav class="dash-navbar">
+    <div class="dash-nav-left">
+      <a href="../index.html" class="brand-logo-badge" style="color: #FFFFFF;">
+        <div class="leaf-icon">🌿</div>
+        <span>FarmOS</span>
+      </a>
+      <a href="my-lots.html" style="background: rgba(255, 255, 255, 0.15); padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: #FFFFFF; text-decoration: none;">
+        ← Back to My Lots
+      </a>
+    </div>
+    <div class="dash-user-menu">
+      <span id="userNavDisplay" style="font-size: 0.9rem; font-weight: 600;">Farmer</span>
+      <button id="logoutBtn" class="dash-btn-logout">Sign Out</button>
+    </div>
+  </nav>
+
+  <main class="dash-main" style="max-width: 680px;">
+    <div style="margin-bottom: 24px;">
+      <span style="color: var(--color-secondary); font-weight: 700; font-size: 0.85rem; letter-spacing: 0.06em; text-transform: uppercase;">
+        Marketplace Listing
+      </span>
+      <h1 style="font-size: 2rem; font-weight: 800; color: var(--color-text-dark); margin-top: 4px;">
+        Publish New Produce Lot
+      </h1>
+      <p style="color: var(--color-text-muted); font-size: 0.95rem;">
+        Provide verified details regarding your crop, available quantity, quality grade, and expected price.
+      </p>
+    </div>
+
+    <div style="background: #FFFFFF; border: 1px solid var(--color-border); border-radius: 16px; padding: 32px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+      <form id="standaloneAddLotForm">
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+          <div>
+            <label class="filter-label" for="cropSelect" style="display: block; margin-bottom: 8px;">
+              Commodity / Crop Type *
+            </label>
+            <select id="cropSelect" class="filter-select" style="padding: 12px;" required>
+              <option value="">Loading crops...</option>
+            </select>
+            <span style="font-size: 0.78rem; color: var(--color-text-muted); margin-top: 4px; display: block;">
+              Select from standardized commodities tracked across Maharashtra APMCs.
+            </span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div>
+              <label class="filter-label" for="quantityInput" style="display: block; margin-bottom: 8px;">
+                Available Quantity *
+              </label>
+              <input type="number" id="quantityInput" class="filter-input" style="padding: 12px;" placeholder="e.g. 100" min="0.1" step="any" required>
+            </div>
+            <div>
+              <label class="filter-label" for="unitSelect" style="display: block; margin-bottom: 8px;">
+                Unit of Measure *
+              </label>
+              <select id="unitSelect" class="filter-select" style="padding: 12px;" required>
+                <option value="quintal" selected>Quintal (100 kg)</option>
+                <option value="ton">Metric Ton (1,000 kg)</option>
+                <option value="crate">Crate (approx 20-25 kg)</option>
+                <option value="kg">Kilogram (kg)</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div>
+              <label class="filter-label" for="gradeSelect" style="display: block; margin-bottom: 8px;">
+                Produce Quality Grade *
+              </label>
+              <select id="gradeSelect" class="filter-select" style="padding: 12px;" required>
+                <option value="Grade A+">Grade A+ (Export Premium)</option>
+                <option value="Grade A" selected>Grade A (Superior Mandi Grade)</option>
+                <option value="Grade B">Grade B (Standard Commercial)</option>
+                <option value="Grade C">Grade C (Bulk / Processing)</option>
+              </select>
+            </div>
+            <div>
+              <label class="filter-label" for="priceInput" style="display: block; margin-bottom: 8px;">
+                Expected Target Price (₹ per unit)
+              </label>
+              <input type="number" id="priceInput" class="filter-input" style="padding: 12px;" placeholder="e.g. 2400" min="0" step="any">
+              <span style="font-size: 0.78rem; color: var(--color-text-muted); margin-top: 4px; display: block;">
+                Leave blank to invite open competitive offers.
+              </span>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div>
+              <label class="filter-label" for="availDateInput" style="display: block; margin-bottom: 8px;">
+                Available for Dispatch From *
+              </label>
+              <input type="date" id="availDateInput" class="filter-input" style="padding: 12px;" required>
+            </div>
+            <div>
+              <label class="filter-label" for="locationInput" style="display: block; margin-bottom: 8px;">
+                Farm Origin / Village & District *
+              </label>
+              <input type="text" id="locationInput" class="filter-input" style="padding: 12px;" placeholder="e.g. Lasalgaon, Nashik" required>
+            </div>
+          </div>
+
+          <div id="formAlertBox" style="display: none; padding: 12px 16px; border-radius: 8px; font-size: 0.9rem;"></div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 14px; margin-top: 12px; padding-top: 20px; border-top: 1px solid var(--color-border);">
+            <a href="my-lots.html" class="btn-secondary-sm" style="padding: 12px 20px;">
+              Cancel
+            </a>
+            <button type="submit" id="publishBtn" class="btn-primary-sm" style="padding: 12px 26px; font-size: 1rem;">
+              🚀 Publish Produce Lot
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script type="module">
+    import { getSupabase } from '../js/supabaseClient.js';
+
+    let supabase;
+    let currentUser = null;
+    let cachedCrops = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        supabase = getSupabase();
+      } catch (err) {
+        console.error('Supabase init error:', err);
+        return;
+      }
+
+      // Verify authenticated session
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session || !session.user) {
+        const cached = localStorage.getItem('farmos_user');
+        if (!cached) {
+          window.location.href = 'farmer-login.html';
+          return;
+        }
+        currentUser = JSON.parse(cached);
+      } else {
+        currentUser = session.user;
+      }
+
+      // Pre-fill default date & location from profile
+      document.getElementById('availDateInput').value = new Date().toISOString().split('T')[0];
+
+      try {
+        const { data: profile } = await supabase
+          .from('farmers')
+          .select('*')
+          .eq('id', currentUser.id)
+          .single();
+        if (profile) {
+          document.getElementById('userNavDisplay').textContent = profile.name || 'Farmer';
+          const loc = [profile.village, profile.district, profile.state].filter(Boolean).join(', ');
+          if (loc) document.getElementById('locationInput').value = loc;
+        }
+      } catch (e) {}
+
+      // Load crops
+      await loadCrops();
+
+      // Form submission
+      setupForm();
+    });
+
+    async function loadCrops() {
+      try {
+        const { data, error } = await supabase.from('crops').select('*').order('name');
+        if (error) throw error;
+        cachedCrops = data || [];
+        const select = document.getElementById('cropSelect');
+        select.innerHTML = '<option value="">Select a commodity...</option>' +
+          cachedCrops.map(c => `<option value="${c.id}" data-unit="${c.unit}">${c.name} — ${c.category}</option>`).join('');
+
+        select.addEventListener('change', () => {
+          const opt = select.options[select.selectedIndex];
+          const unit = opt.getAttribute('data-unit');
+          if (unit) {
+            const unitSelect = document.getElementById('unitSelect');
+            for (let i = 0; i < unitSelect.options.length; i++) {
+              if (unitSelect.options[i].value === unit) {
+                unitSelect.selectedIndex = i;
+                break;
+              }
+            }
+          }
+        });
+      } catch (err) {
+        console.error('Error fetching crops:', err);
+      }
+    }
+
+    function setupForm() {
+      const form = document.getElementById('standaloneAddLotForm');
+      const alertBox = document.getElementById('formAlertBox');
+      const submitBtn = document.getElementById('publishBtn');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        alertBox.style.display = 'none';
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Publishing to Network...';
+
+        try {
+          const cropId = document.getElementById('cropSelect').value;
+          const quantity = parseFloat(document.getElementById('quantityInput').value);
+          const unit = document.getElementById('unitSelect').value;
+          const grade = document.getElementById('gradeSelect').value;
+          const priceRaw = document.getElementById('priceInput').value;
+          const priceExpectation = priceRaw ? parseFloat(priceRaw) : null;
+          const availableFrom = document.getElementById('availDateInput').value;
+          const location = document.getElementById('locationInput').value.trim();
+
+          if (!cropId) throw new Error('Please choose a crop commodity.');
+          if (!quantity || quantity <= 0) throw new Error('Quantity must be greater than 0.');
+
+          const payload = {
+            farmer_id: currentUser.id,
+            crop_id: cropId,
+            quantity: quantity,
+            unit: unit,
+            grade: grade,
+            price_expectation: priceExpectation,
+            available_from: availableFrom,
+            status: 'active',
+            location: location
+          };
+
+          const { error } = await supabase.from('lots').insert([payload]);
+          if (error) throw error;
+
+          alertBox.style.background = 'var(--color-success-bg)';
+          alertBox.style.color = 'var(--color-success)';
+          alertBox.style.border = '1px solid var(--color-success-border)';
+          alertBox.textContent = '✓ Produce lot listed successfully! Redirecting to My Lots...';
+          alertBox.style.display = 'block';
+
+          setTimeout(() => {
+            window.location.href = 'my-lots.html';
+          }, 1200);
+        } catch (err) {
+          console.error('Submission failed:', err);
+          alertBox.style.background = 'var(--color-error-bg)';
+          alertBox.style.color = 'var(--color-error)';
+          alertBox.style.border = '1px solid var(--color-error-border)';
+          alertBox.textContent = err.message || 'Failed to list produce lot.';
+          alertBox.style.display = 'block';
+          submitBtn.disabled = false;
+          submitBtn.textContent = '🚀 Publish Produce Lot';
+        }
+      });
+
+      document.getElementById('logoutBtn').addEventListener('click', async () => {
+        try {
+          await supabase.auth.signOut();
+        } catch (err) {}
+        localStorage.removeItem('farmos_user');
+        window.location.href = 'farmer-login.html';
+      });
+    }
+  </script>
+</body>
+</html>
